@@ -35,6 +35,8 @@ int Client::connect_to_player(const char* ip_address, int port) {
     return -1;
 	}
     players.push_back(socket_id);
+    send_int_to(0, client_id);
+    cout << "Connected to player " << receive_int_from(0) << endl;
     return 1;
 }
 

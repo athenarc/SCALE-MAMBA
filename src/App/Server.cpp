@@ -19,8 +19,11 @@ void Server::accept_clients() {
   cout << "Waiting for client connection" << endl;
   int client = accept(socket_id, (struct sockaddr *) &addr, &len);
   printf("Accepted Connection: %s:%d\n", inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
+  uint8_t buff[4];
+  receive_msg(client, buff, 4);
+  cout << "Client " << BYTES_TO_INT(buff) << " connected." <<endl;
   clients.push_back(client);
-
+  send_int_to(0, player_id);
   
   if (client == -1)
   {
