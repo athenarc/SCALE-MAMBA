@@ -34,7 +34,7 @@ public:
   Server(unsigned int id, unsigned int port, unsigned int max_clients);
 
   ~Server();
-  
+  State get_state();
   void state_transition();
   void accept_clients();
   void send_int_to(unsigned int client_id, unsigned int x);

@@ -48,6 +48,11 @@ int Client::connect_to_player(const char* ip_address, int port) {
 //   send_msg(players.at(i), buff, 4);}
 // }
 
+State Client::get_state(){
+  return protocol_state;
+}
+
+
 void Client::state_transition(){
   switch(protocol_state){
     case State::INITIAL :
@@ -60,7 +65,6 @@ void Client::state_transition(){
         protocol_state = State::DATASET_ACCEPTED;
         break;
     case State::DATASET_ACCEPTED :
-    cout << "OK" <<endl;
         break;
   }
 }

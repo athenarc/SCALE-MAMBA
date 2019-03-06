@@ -33,6 +33,11 @@ void Server::accept_clients() {
   
 }
 
+State Server::get_state(){
+  return protocol_state;
+}
+
+
 void Server::state_transition(){
   switch(protocol_state){
     case State::INITIAL :
@@ -45,7 +50,6 @@ void Server::state_transition(){
         protocol_state = State::DATASET_ACCEPTED;
         break;
     case State::DATASET_ACCEPTED :
-    cout << "OK" <<endl;
         break;
   }
 }

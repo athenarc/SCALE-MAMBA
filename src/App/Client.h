@@ -32,6 +32,7 @@ public:
   Client(unsigned int id, unsigned int max_clients);
 
   ~Client();
+  State get_state();
   void state_transition();
   int connect_to_player(const char* ip_address, int port);
   void send_int_to(unsigned int player_id, unsigned int x);

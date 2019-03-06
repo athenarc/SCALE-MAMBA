@@ -20,18 +20,30 @@ int main(int argc, const char *argv[]) {
   s.accept_clients();
   // The protocol starts here after connections 
   // have been established
-  // while(1){
-  //   switch(s.state)
+  while(1){
+    switch(s.get_state()){
+      case State::INITIAL :
+        cout << "Ok init" <<endl;
+        s.state_transition();
+        break;
+    case State::CLIENT_INFO_RECEIVED :
+        cout << "Ok Client_rcvd" <<endl;
+        s.state_transition();
+        break;
+    case State::RANDOMNESS_SENT :
+        cout << "Ok rand" <<endl;
+        s.state_transition();
+        break;
+    case State::DATASET_ACCEPTED :
+        cout << "Ok data acc" <<endl;
+        return 0;
+          }
+    }
 
-
-
-
-  // }
+  }
 
   // while(1){
   //   int a = s.receive_int_from(0);
   //   cout << a << endl;
   //   s.send_int_to(0, a*a);
-  // }
-  return 0;
-}
+  // 
