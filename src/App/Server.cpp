@@ -33,6 +33,23 @@ void Server::accept_clients() {
   
 }
 
+void Server::state_transition(){
+  switch(protocol_state){
+    case State::INITIAL :
+        protocol_state = State::CLIENT_INFO_RECEIVED;
+        break;
+    case State::CLIENT_INFO_RECEIVED :
+        protocol_state = State::RANDOMNESS_SENT;
+        break;
+    case State::RANDOMNESS_SENT :
+        protocol_state = State::DATASET_ACCEPTED;
+        break;
+    case State::DATASET_ACCEPTED :
+    cout << "OK" <<endl;
+        break;
+  }
+}
+
 void Server::send_int_to(unsigned int client_id, unsigned int x)
 {
   uint8_t buff[4];

@@ -35,6 +35,7 @@ public:
 
   ~Server();
   
+  void state_transition();
   void accept_clients();
   void send_int_to(unsigned int client_id, unsigned int x);
   int receive_int_from(unsigned int client_id);

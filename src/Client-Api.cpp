@@ -22,11 +22,16 @@ int main(int argc, const char *argv[]) {
   if (f == -1){
     exit(-1);
   }
-  while(1){
-  cout << "Enter message: " << endl;
-  cin >> int_msg;
-  c.send_int_to(0, int_msg);
-  cout << "Got: " << c.receive_int_from(0) << endl;
-  }
+
+  // The protocol starts here after connections 
+  // have been established
+
+
+  // while(1){
+  // cout << "Enter message: " << endl;
+  // cin >> int_msg;
+  // c.send_int_to(0, int_msg);
+  // cout << "Got: " << c.receive_int_from(0) << endl;
+  // }
   return 0;
 }

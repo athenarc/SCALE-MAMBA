@@ -1,5 +1,5 @@
 #include <iostream>
-
+#include "App/Protocol.h"
 #include "App/Server.h"
 
 using namespace std;
@@ -18,11 +18,20 @@ int main(int argc, const char *argv[]) {
   Server s(id, 14000 + id, max_c);
 
   s.accept_clients();
+  // The protocol starts here after connections 
+  // have been established
+  // while(1){
+  //   switch(s.state)
 
-  while(1){
-    int a = s.receive_int_from(0);
-    cout << a << endl;
-    s.send_int_to(0, a*a);
-  }
+
+
+
+  // }
+
+  // while(1){
+  //   int a = s.receive_int_from(0);
+  //   cout << a << endl;
+  //   s.send_int_to(0, a*a);
+  // }
   return 0;
 }

@@ -48,6 +48,23 @@ int Client::connect_to_player(const char* ip_address, int port) {
 //   send_msg(players.at(i), buff, 4);}
 // }
 
+void Client::state_transition(){
+  switch(protocol_state){
+    case State::INITIAL :
+        protocol_state = State::CLIENT_INFO_RECEIVED;
+        break;
+    case State::CLIENT_INFO_RECEIVED :
+        protocol_state = State::RANDOMNESS_SENT;
+        break;
+    case State::RANDOMNESS_SENT :
+        protocol_state = State::DATASET_ACCEPTED;
+        break;
+    case State::DATASET_ACCEPTED :
+    cout << "OK" <<endl;
+        break;
+  }
+}
+
 void Client::send_int_to(unsigned int player_id, unsigned int x)
 {
   uint8_t buff[4];
