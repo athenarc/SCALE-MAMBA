@@ -12,6 +12,7 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <string.h>
+#include <App/App.h>
 
 #include "System/Networking.h"
 #include "Exceptions/Exceptions.h"
@@ -29,10 +30,13 @@ private:
   vector<int> players;
 
 public:
+  ifstream inpf;
+  
   Client(unsigned int id, unsigned int max_clients);
-
+  
   ~Client();
   State get_state();
+  int get_id();
   void state_transition();
   int connect_to_player(const char* ip_address, int port);
   void send_int_to(unsigned int player_id, unsigned int x);

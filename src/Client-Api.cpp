@@ -6,7 +6,7 @@ using namespace std;
 
 int main(int argc, const char *argv[]) {
 
-  int id, int_msg, f;
+  int id, int_msg, f, data_size;
   if (argc > 1){
     id = atoi(argv[1]);
   }
@@ -23,12 +23,25 @@ int main(int argc, const char *argv[]) {
     exit(-1);
   }
 
+  App app(c.get_id());
+  unique_ptr<IO_Stream> iof = app.make_IO();
+  
+  c.inpf.open("Client_data.txt");
+  if (!c.inpf) {
+        cout << "Unable to open file" <<endl;
+        exit(-1); // terminate with error
+    }
   // The protocol starts here after connections 
   // have been established
   while(1){
     switch(c.get_state()){
       case State::INITIAL :
-        cout << "Ok init" <<endl;
+        /* This works. but gfp is not int so need
+        to figure out how to send floats */
+        /* iof -> private_input_gfp(0); */
+        c.inpf >> data_size;
+        c.inpf.close();
+        c.send_int_to(0, data_size);
         c.state_transition();
         break;
     case State::CLIENT_INFO_RECEIVED :

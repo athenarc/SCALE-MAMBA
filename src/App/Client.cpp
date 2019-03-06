@@ -52,6 +52,10 @@ State Client::get_state(){
   return protocol_state;
 }
 
+int Client::get_id(){
+  return client_id;
+}
+
 
 void Client::state_transition(){
   switch(protocol_state){

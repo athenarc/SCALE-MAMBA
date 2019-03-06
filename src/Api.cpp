@@ -5,7 +5,7 @@
 using namespace std;
 
 int main(int argc, const char *argv[]) {
-  int id;
+  int id, data_size;
   
   if (argc > 1){
     id = atoi(argv[1]);
@@ -23,7 +23,12 @@ int main(int argc, const char *argv[]) {
   while(1){
     switch(s.get_state()){
       case State::INITIAL :
-        cout << "Ok init" <<endl;
+        data_size = s.receive_int_from(0);
+        if (data_size <= 0){
+          cout << "Data size must be positive" << endl;
+          exit(-1);
+        }
+        cout << "Got your message: " << data_size << endl;
         s.state_transition();
         break;
     case State::CLIENT_INFO_RECEIVED :
