@@ -17,11 +17,14 @@
 #include "Exceptions/Exceptions.h"
 #include "Tools/int.h"
 
+#include "Protocol.h"
+
 using namespace std;
 
 class Server {
 private:
   int socket_id;
+  State protocol_state = State::INITIAL;
   unsigned int player_id;
   unsigned int port_number;
   unsigned int max_clients;

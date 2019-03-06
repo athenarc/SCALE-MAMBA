@@ -17,10 +17,13 @@
 #include "Exceptions/Exceptions.h"
 #include "Tools/int.h"
 
+#include "Protocol.h"
+
 using namespace std;
 
 class Client {
 private:
+  State protocol_state = State::INITIAL;
   unsigned int client_id;
   unsigned int max_players;
   vector<int> players;
