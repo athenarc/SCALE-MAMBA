@@ -8,7 +8,7 @@ Server::Server(unsigned int id, unsigned int port, unsigned int max_clients):
 }
 
 Server::~Server() {
-  cout << "Close" << endl;
+  cout << "Closing server...." << endl;
   close(socket_id);
 }
 
@@ -16,12 +16,18 @@ void Server::accept_clients() {
   struct sockaddr_in addr;
   memset(&addr, 0, sizeof(addr));
   socklen_t len = sizeof(addr);
+
   cout << "Waiting for client connection" << endl;
+
   int client = accept(socket_id, (struct sockaddr *) &addr, &len);
+
   printf("Accepted Connection: %s:%d\n", inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
+
   uint8_t buff[4];
   receive_msg(client, buff, 4);
+
   cout << "Client " << BYTES_TO_INT(buff) << " connected." <<endl;
+
   clients.push_back(client);
   send_int_to(0, player_id);
   
@@ -61,20 +67,13 @@ void Server::send_int_to(unsigned int client_id, unsigned int x)
   send_msg(clients.at(client_id), buff, 4);
 }
 
-// void Server::broadcast_int(unsigned int x)
-// { int i;
-//   for (i = 0; i < max_clients; i++){
-//   uint8_t buff[4];
-//   INT_TO_BYTES(buff, x);
-//   send_msg(clients.at(i), buff, 4);}
-// }
-
 int Server::receive_int_from(unsigned int client_id)
-{ if (client_id < max_clients){
-  uint8_t buff[4];
-  receive_msg(clients.at(client_id), buff, 4);
-  return BYTES_TO_INT(buff);}
-  else{
+{ 
+  if (client_id < max_clients) {
+    uint8_t buff[4];
+    receive_msg(clients.at(client_id), buff, 4);
+    return BYTES_TO_INT(buff);
+  } else{
     cout << "No connection" <<endl;
     exit(-1);
   }

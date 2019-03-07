@@ -14,39 +14,29 @@ Client::~Client() {
 
 int Client::connect_to_player(const char* ip_address, int port) {
   struct sockaddr_in addr;
-  // create a socket
   int socket_id = socket(AF_INET , SOCK_STREAM , 0);
 
   if (socket_id == -1)
 	{
 		printf("Could not create socket");
 	}
-  bzero(&addr, sizeof(addr));       /* Zero the struct before filling the fields */
-  addr.sin_family= AF_INET;         /* Set the connection to TCP/IP */
-  // accept on any of machines IP address
-  addr.sin_addr.s_addr= INADDR_ANY; /* Set our address to any interface */
-  //inet_pton(AF_INET, ip_address, &(addr.sin_addr));
-  // htons transforms number to network byte order 
-  addr.sin_port= htons(port);       /* Set the server port number */
+
+  bzero(&addr, sizeof(addr));
+  addr.sin_family= AF_INET;
+  addr.sin_addr.s_addr= INADDR_ANY;
+  addr.sin_port= htons(port);
 
   if (connect(socket_id , (struct sockaddr *)&addr , sizeof(addr)) < 0)
 	{
 		perror("connect failed. Error");
     return -1;
 	}
-    players.push_back(socket_id);
-    send_int_to(0, client_id);
-    cout << "Connected to player " << receive_int_from(0) << endl;
-    return 1;
-}
 
-// void Client::broadcast_int(unsigned int x)
-// { int i;
-//   for (i = 0; i < max_players; i++){
-//   uint8_t buff[4];
-//   INT_TO_BYTES(buff, x);
-//   send_msg(players.at(i), buff, 4);}
-// }
+  players.push_back(socket_id);
+  send_int_to(0, client_id);
+  cout << "Connected to player " << receive_int_from(0) << endl;
+  return 1;
+}
 
 State Client::get_state(){
   return protocol_state;
@@ -77,20 +67,24 @@ void Client::send_int_to(unsigned int player_id, unsigned int x)
 {
   uint8_t buff[4];
   INT_TO_BYTES(buff, x);
-  if (player_id >= max_players){
+
+  if (player_id >= max_players) {
       cout << "No player " << player_id <<endl;
       exit(-1);
   }
+
   send_msg(players.at(player_id), buff, 4);
 }
 
 int Client::receive_int_from(unsigned int player_id)
 {
   uint8_t buff[4];
-  if (player_id >= max_players){
+
+  if (player_id >= max_players) {
       cout << "No player " << player_id <<endl;
       exit(-1);
   }
+
   receive_msg(players.at(player_id), buff, 4);
   return BYTES_TO_INT(buff);
 }
