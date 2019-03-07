@@ -1,5 +1,5 @@
-#ifndef _Server
-#define _Server
+#ifndef _Client
+#define _Client
 
 #include <iostream>
 #include <memory>
