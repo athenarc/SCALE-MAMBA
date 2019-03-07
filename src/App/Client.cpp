@@ -1,18 +1,18 @@
 #include "Client.h"
 
-Client::Client(unsigned int id, unsigned int max_players):
+sedp::Client::Client(unsigned int id, unsigned int max_players):
   client_id{id}, max_players{max_players}
 {
   cout << "Client " << client_id << endl;
   
 }
 
-Client::~Client() {
-  cout << "Close" << endl;
-//   close(socket_id);
+sedp::Client::~Client() {
+    cout << "Closing client..." << endl;
+    close(socket_id);
 }
 
-int Client::connect_to_player(const char* ip_address, int port) {
+int sedp::Client::connect_to_player(const char* ip_address, int port) {
   struct sockaddr_in addr;
   int socket_id = socket(AF_INET , SOCK_STREAM , 0);
 
@@ -38,16 +38,16 @@ int Client::connect_to_player(const char* ip_address, int port) {
   return 1;
 }
 
-State Client::get_state(){
+sedp::State sedp::Client::get_state(){
   return protocol_state;
 }
 
-int Client::get_id(){
+int sedp::Client::get_id(){
   return client_id;
 }
 
 
-void Client::state_transition(){
+void sedp::Client::state_transition(){
   switch(protocol_state){
     case State::INITIAL :
         protocol_state = State::RANDOMNESS_SENT;
@@ -63,7 +63,7 @@ void Client::state_transition(){
   }
 }
 
-void Client::send_int_to(unsigned int player_id, unsigned int x)
+void sedp::Client::send_int_to(unsigned int player_id, unsigned int x)
 {
   uint8_t buff[4];
   INT_TO_BYTES(buff, x);
@@ -76,7 +76,7 @@ void Client::send_int_to(unsigned int player_id, unsigned int x)
   send_msg(players.at(player_id), buff, 4);
 }
 
-int Client::receive_int_from(unsigned int player_id)
+int sedp::Client::receive_int_from(unsigned int player_id)
 {
   uint8_t buff[4];
 
@@ -89,7 +89,7 @@ int Client::receive_int_from(unsigned int player_id)
   return BYTES_TO_INT(buff);
 }
 
-void Client::send_msg(int socket, uint8_t *msg, int len)
+void sedp::Client::send_msg(int socket, uint8_t *msg, int len)
 {
   if (send(socket, msg, len, 0) != len)
     {
@@ -97,7 +97,7 @@ void Client::send_msg(int socket, uint8_t *msg, int len)
     }
 }
 
-void Client::receive_msg(int socket, uint8_t *msg, int len)
+void sedp::Client::receive_msg(int socket, uint8_t *msg, int len)
 {
   int i = 0, j;
   while (len - i > 0)

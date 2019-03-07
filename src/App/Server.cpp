@@ -1,18 +1,18 @@
 #include "Server.h"
 
-Server::Server(unsigned int id, unsigned int port, unsigned int max_clients):
+sedp::Server::Server(unsigned int id, unsigned int port, unsigned int max_clients):
   player_id{id}, port_number{port}, max_clients{max_clients}
 {
   cout << "Server (Player) " << player_id << ": Start listening at port " << port << endl;
   socket_id = OpenListener(port_number, max_clients);
 }
 
-Server::~Server() {
+sedp::Server::~Server() {
   cout << "Closing server...." << endl;
   close(socket_id);
 }
 
-void Server::accept_clients() {
+void sedp::Server::accept_clients() {
   struct sockaddr_in addr;
   memset(&addr, 0, sizeof(addr));
   socklen_t len = sizeof(addr);
@@ -39,12 +39,12 @@ void Server::accept_clients() {
   
 }
 
-State Server::get_state(){
+sedp::State sedp::Server::get_state(){
   return protocol_state;
 }
 
 
-void Server::state_transition(){
+void sedp::Server::state_transition(){
   switch(protocol_state){
     case State::INITIAL :
         protocol_state = State::RANDOMNESS_SENT;
@@ -60,14 +60,14 @@ void Server::state_transition(){
   }
 }
 
-void Server::send_int_to(unsigned int client_id, unsigned int x)
+void sedp::Server::send_int_to(unsigned int client_id, unsigned int x)
 {
   uint8_t buff[4];
   INT_TO_BYTES(buff, x);
   send_msg(clients.at(client_id), buff, 4);
 }
 
-int Server::receive_int_from(unsigned int client_id)
+int sedp::Server::receive_int_from(unsigned int client_id)
 { 
   if (client_id < max_clients) {
     uint8_t buff[4];
@@ -79,7 +79,7 @@ int Server::receive_int_from(unsigned int client_id)
   }
 }
 
-void Server::send_msg(int socket, uint8_t *msg, int len)
+void sedp::Server::send_msg(int socket, uint8_t *msg, int len)
 {
   if (send(socket, msg, len, 0) != len)
     {
@@ -87,7 +87,7 @@ void Server::send_msg(int socket, uint8_t *msg, int len)
     }
 }
 
-void Server::receive_msg(int socket, uint8_t *msg, int len)
+void sedp::Server::receive_msg(int socket, uint8_t *msg, int len)
 {
   int i = 0, j;
   while (len - i > 0)

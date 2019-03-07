@@ -3,6 +3,7 @@
 #include "App/Server.h"
 
 using namespace std;
+using namespace sedp;
 
 int main(int argc, const char *argv[]) {
   int id, data_size, counter, datum, share, max_c =3;

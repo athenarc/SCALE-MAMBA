@@ -2,6 +2,7 @@
 #include "App/Client.h"
 
 using namespace std;
+using namespace sedp;
 
 int main(int argc, const char *argv[]) {
 

@@ -23,29 +23,33 @@
 
 using namespace std;
 
-class Client {
-private:
-  State protocol_state = State::INITIAL;
-  unsigned int client_id;
-  unsigned int max_players;
-  vector<int> players;
+namespace sedp {
+  class Client {
+  private:
+    int socket_id;
+    State protocol_state = State::INITIAL;
+    unsigned int client_id;
+    unsigned int max_players;
+    vector<int> players;
 
-public:
-  ifstream inpf;
+  public:
+    ifstream inpf;
 
-  Client(unsigned int id, unsigned int max_clients);
-  
-  ~Client();
-  State get_state();
-  int get_id();
-  void state_transition();
-  int connect_to_player(const char* ip_address, int port);
-  void send_int_to(unsigned int player_id, unsigned int x);
-  int receive_int_from(unsigned int player_id);
-  void broadcast_int(unsigned int x);
-  void send_msg(int socket, uint8_t *msg, int len);
-  void receive_msg(int socket, uint8_t *msg, int len);
+    Client(unsigned int id, unsigned int max_clients);
+    
+    ~Client();
+    State get_state();
+    int get_id();
+    void state_transition();
+    int connect_to_player(const char* ip_address, int port);
+    void send_int_to(unsigned int player_id, unsigned int x);
+    int receive_int_from(unsigned int player_id);
+    void broadcast_int(unsigned int x);
+    void send_msg(int socket, uint8_t *msg, int len);
+    void receive_msg(int socket, uint8_t *msg, int len);
 
-};
+  };
+}
+
 
 #endif
