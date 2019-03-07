@@ -18,7 +18,7 @@ int sedp::Client::connect_to_player(const char* ip_address, int port) {
 
   if (socket_id == -1)
 	{
-		printf("Could not create socket");
+    throw Networking_error("Receiving error - 1");
 	}
 
   bzero(&addr, sizeof(addr));
@@ -28,13 +28,13 @@ int sedp::Client::connect_to_player(const char* ip_address, int port) {
 
   if (connect(socket_id , (struct sockaddr *)&addr , sizeof(addr)) < 0)
 	{
-		perror("connect failed. Error");
+		perror("Connect failed. Error");
     return -1;
 	}
 
   players.push_back(socket_id);
-  send_int_to(0, client_id);
-  cout << "Connected to player " << receive_int_from(0) << endl;
+  send_int_to(socket_id, client_id);
+  cout << "Connected to player " << receive_int_from(socket_id) << endl;
   return 1;
 }
 
@@ -54,7 +54,7 @@ void sedp::Client::run_protocol() {
     switch(protocol_state) {
       case State::INITIAL: {
         cout << "Counting my dataset size..." << endl;
-        send_int_to(0, dataset_size);
+        send_int_to(players.at(0), dataset_size);
         protocol_state = State::RANDOMNESS_SENT;
         break;
       }
@@ -66,7 +66,7 @@ void sedp::Client::run_protocol() {
         counter = dataset_size;
 
         while (counter > 0){
-          int share = receive_int_from(0);
+          int share = receive_int_from(players.at(0));
           cout << share << endl;
           counter--;
         }
@@ -81,7 +81,7 @@ void sedp::Client::run_protocol() {
         counter = 0;
 
         while (counter < dataset_size) {
-          send_int_to(0, counter + counter);
+          send_int_to(players.at(0), counter + counter);
           counter++;
         }
 
@@ -97,51 +97,3 @@ void sedp::Client::run_protocol() {
     } // end switch
   } // end while-loop
 } // end run_protocol
-
-void sedp::Client::send_int_to(unsigned int player_id, unsigned int x)
-{
-  uint8_t buff[4];
-  INT_TO_BYTES(buff, x);
-
-  if (player_id >= max_players) {
-      cout << "No player " << player_id <<endl;
-      exit(-1);
-  }
-
-  send_msg(players.at(player_id), buff, 4);
-}
-
-int sedp::Client::receive_int_from(unsigned int player_id)
-{
-  uint8_t buff[4];
-
-  if (player_id >= max_players) {
-      cout << "No player " << player_id <<endl;
-      exit(-1);
-  }
-
-  receive_msg(players.at(player_id), buff, 4);
-  return BYTES_TO_INT(buff);
-}
-
-void sedp::Client::send_msg(int socket, uint8_t *msg, int len)
-{
-  if (send(socket, msg, len, 0) != len)
-    {
-      throw Networking_error("Send error - 1 ");
-    }
-}
-
-void sedp::Client::receive_msg(int socket, uint8_t *msg, int len)
-{
-  int i = 0, j;
-  while (len - i > 0)
-    {
-      j = recv(socket, msg + i, len - i, 0);
-      if (j < 0)
-        {
-          throw Networking_error("Receiving error - 1");
-        }
-      i = i + j;
-    }
-}

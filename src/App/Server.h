@@ -21,12 +21,13 @@
 #include "Tools/int.h"
 
 #include "Protocol.h"
+#include "ProtocolEntity.h"
 
 using namespace std;
 
 
 namespace sedp {
-  class Server {
+  class Server: public ProtocolEntity {
   private:
     int socket_id;
     State protocol_state = State::INITIAL;
@@ -45,10 +46,6 @@ namespace sedp {
     void start();
     void run_protocol(); 
     void accept_clients();
-    void send_int_to(unsigned int client_id, unsigned int x);
-    int receive_int_from(unsigned int client_id);
-    void send_msg(int socket, uint8_t *msg, int len);
-    void receive_msg(int socket, uint8_t *msg, int len);
   };
 }
 
