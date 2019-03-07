@@ -12,6 +12,7 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <string.h>
+#include <fstream>
 
 #include "System/Networking.h"
 #include "Exceptions/Exceptions.h"
@@ -31,8 +32,10 @@ private:
   vector<int> clients;
 
 public:
-  Server(unsigned int id, unsigned int port, unsigned int max_clients);
+  ifstream inpf;
 
+  Server(unsigned int id, unsigned int port, unsigned int max_clients);
+  
   ~Server();
   State get_state();
   void state_transition();

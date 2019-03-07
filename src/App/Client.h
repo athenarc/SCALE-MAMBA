@@ -13,6 +13,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <App/App.h>
+#include <fstream>
 
 #include "System/Networking.h"
 #include "Exceptions/Exceptions.h"
@@ -31,7 +32,7 @@ private:
 
 public:
   ifstream inpf;
-  
+
   Client(unsigned int id, unsigned int max_clients);
   
   ~Client();

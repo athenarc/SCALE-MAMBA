@@ -1,6 +1,6 @@
 #ifndef _Protocol
 #define _Protocol
 
-enum class State { INITIAL, CLIENT_INFO_RECEIVED, RANDOMNESS_SENT, DATASET_ACCEPTED };
+enum class State { INITIAL, RANDOMNESS_SENT, MASK_DATA, DATASET_ACCEPTED };
 
 #endif
