@@ -19,64 +19,94 @@ void sedp::Server::accept_clients() {
 
   cout << "Waiting for client connection" << endl;
 
-  int client = accept(socket_id, (struct sockaddr *) &addr, &len);
+  int client_sd = accept(socket_id, (struct sockaddr *) &addr, &len);
 
-  printf("Accepted Connection: %s:%d\n", inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
-
-  uint8_t buff[4];
-  receive_msg(client, buff, 4);
-
-  cout << "Client " << BYTES_TO_INT(buff) << " connected." <<endl;
-
-  clients.push_back(client);
-  send_int_to(0, player_id);
-  
-  if (client == -1)
+  if (client_sd == -1)
   {
     string err= "Unable to accept connections : Error code " + errno;
     throw Networking_error(err);
   }
-  
+
+  printf("Accepted Connection: %s:%d\n", inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
+
+  uint8_t buff[4];
+  receive_msg(client_sd, buff, 4);
+  int client_id = BYTES_TO_INT(buff);
+
+  cout << "Client with id " << client_id << " connected." <<endl;
+
+  clients.insert(make_pair(client_id, client_sd));
+  send_int_to(client_id, player_id);
 }
 
 sedp::State sedp::Server::get_state(){
   return protocol_state;
 }
 
+void sedp::Server::run_protocol() {
+  int dataset_size = 0; // Temp: We need to have a structure that saves the client's info such as dataset_size etc. Maybe in map<int, map<int, string, ...>>
+  int counter = 0;
 
-void sedp::Server::state_transition(){
-  switch(protocol_state){
-    case State::INITIAL :
+  while(protocol_state != State::DATASET_ACCEPTED){
+    switch(protocol_state) {
+      case State::INITIAL: {
+        dataset_size = receive_int_from(0);         
         protocol_state = State::RANDOMNESS_SENT;
         break;
-    case State::RANDOMNESS_SENT :
+      }
+
+      case State::RANDOMNESS_SENT: {
+        cout << "Sending my Shares..." << endl;
+
+        sleep(3);
+        counter = dataset_size;
+
+        while (counter > 0) {
+          send_int_to(0, counter); // Need to send actuall shares!
+          counter--;
+        }
+
         protocol_state = State::MASK_DATA;
         break;
-    case State::MASK_DATA :
+      }
+
+      case State::MASK_DATA: {
+        cout << "Importing data..." <<endl;
+        sleep(3);
+        counter = 0;
+
+        while (counter < dataset_size){
+          int datum = receive_int_from(0);
+          cout << datum << endl;
+          counter++;
+        }
+
         protocol_state = State::DATASET_ACCEPTED;
         break;
-    case State::DATASET_ACCEPTED :
+      }
+
+      case State::DATASET_ACCEPTED: {
+        cout << "Data has been imported." <<endl;
         break;
-  }
-}
+      }
+
+    } // end switch
+  } // end while-loop
+} // end run_protocol
 
 void sedp::Server::send_int_to(unsigned int client_id, unsigned int x)
 {
   uint8_t buff[4];
   INT_TO_BYTES(buff, x);
-  send_msg(clients.at(client_id), buff, 4);
+  send_msg(clients.find(client_id)->second, buff, 4);
 }
+
 
 int sedp::Server::receive_int_from(unsigned int client_id)
 { 
-  if (client_id < max_clients) {
-    uint8_t buff[4];
-    receive_msg(clients.at(client_id), buff, 4);
-    return BYTES_TO_INT(buff);
-  } else{
-    cout << "No connection" <<endl;
-    exit(-1);
-  }
+  uint8_t buff[4];
+  receive_msg(clients.find(client_id)->second, buff, 4);
+  return BYTES_TO_INT(buff);
 }
 
 void sedp::Server::send_msg(int socket, uint8_t *msg, int len)

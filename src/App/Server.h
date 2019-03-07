@@ -13,6 +13,8 @@
 #include <unistd.h>
 #include <string.h>
 #include <fstream>
+#include <iterator> 
+#include <map>
 
 #include "System/Networking.h"
 #include "Exceptions/Exceptions.h"
@@ -31,7 +33,7 @@ namespace sedp {
     unsigned int player_id;
     unsigned int port_number;
     unsigned int max_clients;
-    vector<int> clients;
+    map<int, int> clients;
 
   public:
     ifstream inpf;
@@ -40,11 +42,11 @@ namespace sedp {
 
     ~Server();
     State get_state();
-    void state_transition();
+    void start();
+    void run_protocol(); 
     void accept_clients();
     void send_int_to(unsigned int client_id, unsigned int x);
     int receive_int_from(unsigned int client_id);
-    void broadcast_int(unsigned int x);
     void send_msg(int socket, uint8_t *msg, int len);
     void receive_msg(int socket, uint8_t *msg, int len);
   };

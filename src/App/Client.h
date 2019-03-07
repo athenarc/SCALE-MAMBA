@@ -40,11 +40,10 @@ namespace sedp {
     ~Client();
     State get_state();
     int get_id();
-    void state_transition();
+    void run_protocol(); 
     int connect_to_player(const char* ip_address, int port);
     void send_int_to(unsigned int player_id, unsigned int x);
     int receive_int_from(unsigned int player_id);
-    void broadcast_int(unsigned int x);
     void send_msg(int socket, uint8_t *msg, int len);
     void receive_msg(int socket, uint8_t *msg, int len);
 
