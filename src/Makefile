@@ -9,7 +9,7 @@ LDLIBS = -L/$(OSSL)/lib -lm -lssl -lcrypto -lmpirxx -lmpir -lcryptopp $(LDFLAGS)
 
 all: $(LIB) Setup.x Player.x Api.x Client-Api.x
 
-api: $(LIB) Api.x Client-Api.x
+api: $(LIB) Server-Api.x Client-Api.x
 
 OFFLINE = $(patsubst %.cpp,%.o,$(wildcard Offline/*.cpp))
 ONLINE = $(patsubst %.cpp,%.o,$(wildcard Online/*.cpp))
@@ -30,10 +30,10 @@ LIB = libMPC.a
 
 OBJ = Setup.o Player.o Api.o Client-Api.o
 
-API_OBJ = Api.o
-API_SRC = Api.cpp
+API_OBJ = Server-Api.o Client-Api.o
+API_SRC = Server-Api.cpp Client-Api.cpp
 
-SRC = Setup.cpp Player.cpp Api.cpp
+SRC = Setup.cpp Player.cpp Server-Api.cpp Client-Api.cpp
 
 %.o: %.cpp
 	$(CC) $(CFLAGS) -o $@ -c $<
@@ -55,11 +55,11 @@ Player.x: $(OBJ) $(LIB)
 	$(CC) $(CFLAGS) -o Player.x Player.o $(LIB) $(LDLIBS)
 	- mv Player.x ../
 
-Api.x: $(API_OBJ) $(LIB)
-	$(CC) $(CFLAGS) -o Api.x Api.o $(LIB) $(LDLIBS)
-	- mv Api.x ../
+Server-Api.x: $(API_OBJ) $(LIB)
+	$(CC) $(CFLAGS) -o Server-Api.x Server-Api.o $(LIB) $(LDLIBS)
+	- mv Server-Api.x ../
 
-Client-Api.x: $(OBJ) $(LIB)
+Client-Api.x: $(API_OBJ) $(LIB)
 	$(CC) $(CFLAGS) -o Client-Api.x Client-Api.o $(LIB) $(LDLIBS)
 	- mv Client-Api.x ../
 
