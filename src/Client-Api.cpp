@@ -7,6 +7,8 @@ using namespace sedp;
 int main(int argc, const char *argv[]) {
 
   int id;
+  sockaddr_in addr;
+  vector <struct sockaddr_in> Player_addresses; 
 
   if (argc < 2) {
     cout << "Usage: ./Client-Api.x <client_id>" << endl;
@@ -14,11 +16,21 @@ int main(int argc, const char *argv[]) {
   }
 
   id = atoi(argv[1]);
-  int max_players = 1;
+  int max_players = 3;
 
   Client c(id, max_players);
 
-  int f = c.connect_to_player("127.0.0.1", 14000);
+  int port = 14000;
+  while (port < 14003){
+    bzero(&addr, sizeof(addr));
+    addr.sin_family= AF_INET;
+    addr.sin_addr.s_addr= INADDR_ANY;
+    addr.sin_port= htons(port);
+    Player_addresses.push_back(addr);
+    port++;
+  }
+
+  int f = c.connect_to_players(Player_addresses);
   
   if (f == -1){
     exit(-1);
