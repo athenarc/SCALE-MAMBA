@@ -79,3 +79,7 @@ clean:
 	- cd GC ; rm *.o
 	- cd Exceptions ; rm *.o
 	- cd App; rm *.o
+
+clean_api:
+	- rm Server-Api.x Server-Api.o Client-Api.x Client-Api.o
+	- cd App ; rm *.o
