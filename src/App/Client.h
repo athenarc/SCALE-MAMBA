@@ -42,7 +42,7 @@ namespace sedp {
     State get_state();
     int get_id();
     void run_protocol(); 
-    int connect_to_player(const char* ip_address, int port);
+    int connect_to_player(const string& ip_address, int port);
   };
 }
 

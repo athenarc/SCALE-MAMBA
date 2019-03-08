@@ -12,7 +12,7 @@ sedp::Client::~Client() {
     close(socket_id);
 }
 
-int sedp::Client::connect_to_player(const char* ip_address, int port) {
+int sedp::Client::connect_to_player(const string& ip_address, int port) {
   struct sockaddr_in addr;
   int socket_id = socket(AF_INET , SOCK_STREAM , 0);
 
