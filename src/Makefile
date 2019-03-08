@@ -7,7 +7,7 @@ CFLAGS = -Wall -std=c++11 -pedantic -Wextra -g -pthread -I$(ROOT)/src -maes -mpc
 CPPFLAGS = $(CFLAGS)
 LDLIBS = -L/$(OSSL)/lib -lm -lssl -lcrypto -lmpirxx -lmpir -lcryptopp $(LDFLAGS)
 
-all: $(LIB) Setup.x Player.x Api.x Client-Api.x
+all: $(LIB) Setup.x Player.x Server-Api.x Client-Api.x
 
 api: $(LIB) Server-Api.x Client-Api.x
 
@@ -28,7 +28,7 @@ APP = $(patsubst %.cpp,%.o,$(wildcard App/*.cpp))
 
 LIB = libMPC.a
 
-OBJ = Setup.o Player.o Api.o
+OBJ = Setup.o Player.o Server-Api.o
 
 API_OBJ = Server-Api.o Client-Api.o
 API_SRC = Server-Api.cpp Client-Api.cpp
