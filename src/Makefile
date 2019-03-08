@@ -7,7 +7,9 @@ CFLAGS = -Wall -std=c++11 -pedantic -Wextra -g -pthread -I$(ROOT)/src -maes -mpc
 CPPFLAGS = $(CFLAGS)
 LDLIBS = -L/$(OSSL)/lib -lm -lssl -lcrypto -lmpirxx -lmpir -lcryptopp $(LDFLAGS)
 
-all: $(LIB) Setup.x Player.x
+all: $(LIB) Setup.x Player.x Api.x Client-Api.x
+
+api: $(LIB) Server-Api.x Client-Api.x
 
 OFFLINE = $(patsubst %.cpp,%.o,$(wildcard Offline/*.cpp))
 ONLINE = $(patsubst %.cpp,%.o,$(wildcard Online/*.cpp))
@@ -26,14 +28,20 @@ APP = $(patsubst %.cpp,%.o,$(wildcard App/*.cpp))
 
 LIB = libMPC.a
 
-OBJ = Setup.o Player.o
+OBJ = Setup.o Player.o Api.o
 
-SRC = Setup.cpp Player.cpp
+API_OBJ = Server-Api.o Client-Api.o
+API_SRC = Server-Api.cpp Client-Api.cpp
+
+SRC = Setup.cpp Player.cpp Server-Api.cpp Client-Api.cpp
 
 %.o: %.cpp
 	$(CC) $(CFLAGS) -o $@ -c $<
 
 $(OBJ): $(SRC)
+	$(CC) $(CFLAGS) -c $*.cpp
+
+$(API_OBJ): $(API_SRC)
 	$(CC) $(CFLAGS) -c $*.cpp
 
 $(LIB): $(SYSTEM) $(MATH) $(TOOLS) $(LSSS) $(OFFLINE) $(ONLINE) $(PROCESSOR) $(IO) $(FHE) $(OT) $(GC) $(EXCEPTIONS) $(APP)
@@ -46,6 +54,15 @@ Setup.x: $(OBJ) $(LIB)
 Player.x: $(OBJ) $(LIB)
 	$(CC) $(CFLAGS) -o Player.x Player.o $(LIB) $(LDLIBS)
 	- mv Player.x ../
+
+Server-Api.x: $(API_OBJ) $(LIB)
+	$(CC) $(CFLAGS) -o Server-Api.x Server-Api.o $(LIB) $(LDLIBS)
+	- mv Server-Api.x ../
+
+Client-Api.x: $(API_OBJ) $(LIB)
+	$(CC) $(CFLAGS) -o Client-Api.x Client-Api.o $(LIB) $(LDLIBS)
+	- mv Client-Api.x ../
+
 
 clean:
 	- rm *.x *.o libMPC.a
@@ -62,3 +79,7 @@ clean:
 	- cd GC ; rm *.o
 	- cd Exceptions ; rm *.o
 	- cd App; rm *.o
+
+clean_api:
+	- rm Server-Api.x Server-Api.o Client-Api.x Client-Api.o
+	- cd App ; rm *.o

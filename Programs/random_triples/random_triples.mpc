@@ -1,0 +1,8 @@
+open_channel(0)
+
+a, b, c = sint.get_random_triple()
+
+outp = [a, b, c]
+output_shares(1000,*outp)
+
+close_channel(0)
