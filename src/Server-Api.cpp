@@ -6,9 +6,8 @@ using namespace std;
 using namespace sedp;
 
 int main(int argc, const char *argv[]) {
-  int id, data_size, counter, datum, share;
+  int id;
   int max_clients = 3;
-  vector<int> data, Shares;
 
   if (argc < 2) {
     cout << "Usage: ./Server-Api.x <server_id>" << endl;

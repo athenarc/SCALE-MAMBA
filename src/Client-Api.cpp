@@ -6,8 +6,7 @@ using namespace sedp;
 
 int main(int argc, const char *argv[]) {
 
-  int id, int_msg, f, counter, datum, mask, data_size, share;
-  vector<int> Shares, my_data;
+  int id;
 
   if (argc < 2) {
     cout << "Usage: ./Client-Api.x <client_id>" << endl;
@@ -15,10 +14,11 @@ int main(int argc, const char *argv[]) {
   }
 
   id = atoi(argv[1]);
+  int max_players = 1;
 
-  Client c(id, 3);
+  Client c(id, max_players);
 
-  f = c.connect_to_player("127.0.0.1", 14000);
+  int f = c.connect_to_player("127.0.0.1", 14000);
   
   if (f == -1){
     exit(-1);
