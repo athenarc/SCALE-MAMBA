@@ -32,6 +32,7 @@ namespace sedp {
     unsigned int client_id;
     unsigned int max_players;
     vector<int> players;
+    int dataset_size;
 
   public:
     ifstream inpf;
@@ -43,6 +44,9 @@ namespace sedp {
     int get_id();
     void run_protocol(); 
     int connect_to_player(const string& ip_address, int port);
+    void send_dataset_size();
+    void send_private_inputs();
+    void get_random_triples();
   };
 }
 

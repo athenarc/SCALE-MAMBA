@@ -35,6 +35,7 @@ namespace sedp {
     unsigned int port_number;
     unsigned int max_clients;
     map<int, int> clients;
+    int dataset_size;
 
   public:
     ifstream inpf;
@@ -46,6 +47,9 @@ namespace sedp {
     void start();
     void run_protocol(); 
     void accept_clients();
+    void send_random_triples();
+    void get_private_inputs();
+    void get_dataset_size();
   };
 }
 
