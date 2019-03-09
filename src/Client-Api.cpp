@@ -31,10 +31,8 @@ int main(int argc, const char *argv[]) {
 
   c.connect_to_players(player_addresses);
   
-  int counter = 0;
-  while (counter < 3){
-    c.run_protocol(counter);
-    counter++;
-  }
+  unsigned int counter = 0;
+  c.run_protocol(counter);
+  counter++;
   return 0;
 }

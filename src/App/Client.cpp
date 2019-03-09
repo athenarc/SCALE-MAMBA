@@ -1,3 +1,4 @@
+#include <thread>
 #include "Client.h"
 
 sedp::Client::Client(unsigned int id, unsigned int max_players):
@@ -55,10 +56,18 @@ int sedp::Client::get_id(){
   return client_id;
 }
 
-void sedp::Client::send_dataset_size(int player_id) {
+void sedp::Client::send_dataset_size() {
+  thread t[max_players];
   cout << "Counting my dataset size..." << endl;
   dataset_size = 10;
-  send_int_to(players.at(player_id), dataset_size);
+  for (unsigned int i =0; i<players.size(); i++){
+    t[i] = thread(&Client::send_int_to, this, players.at(i), dataset_size);
+  }
+  //wait for threads to finish
+  for (unsigned int i =0; i<players.size(); i++){
+    t[i].join();
+  }
+  cout << "Succesfully sent dataset size!" <<endl;
 }
 
 void sedp::Client::send_private_inputs(int player_id) {
@@ -71,25 +80,26 @@ void sedp::Client::send_private_inputs(int player_id) {
     send_int_to(players.at(player_id), counter + counter);
     counter++;
   }
+  cout << "\nSuccesfully sent my data to player " + to_string(player_id) + "!" <<endl;
 
 }
 
 void sedp::Client::get_random_triples(int player_id) {
 
-  cout << "Listening for shares..." <<endl;
+  cout << "\nListening for shares of player" + to_string(player_id) + "..." <<endl;
   sleep(3);
 
   int counter = dataset_size;
 
   while (counter > 0){
     int share = receive_int_from(players.at(player_id));
-    cout << share << endl;
+    cout << player_id << " " << share << endl;
     counter--;
   }
-
+  cout << "Succesfully received shares of player" + to_string(player_id) + "!" <<endl;
 }
 
-void sedp::Client::run_protocol(int player_id) {
+void sedp::Client::run_protocol(unsigned int player_id) {
   if (player_id >= players.size()){
     perror("Not connected to a server with this id");
     exit(-1);
@@ -98,20 +108,39 @@ void sedp::Client::run_protocol(int player_id) {
   while(protocol_states.at(player_id) != State::DATASET_ACCEPTED){
     switch(protocol_states.at(player_id)) {
       case State::INITIAL: {
-        send_dataset_size(player_id);
-        protocol_states.at(player_id) = State::RANDOMNESS_SENT;
+        send_dataset_size();
+        for (vector<State>::iterator it = protocol_states.begin() ; it != protocol_states.end(); ++it){
+          (*it) = State::RANDOMNESS_SENT;
+        }
         break;
       }
 
       case State::RANDOMNESS_SENT: {
-        get_random_triples(player_id);
-        protocol_states.at(player_id) = State::PRIVATE_INPUTS;
+        thread t[players.size()];
+        for (unsigned int i = 0; i<players.size(); i++){
+          t[i] = thread(&Client::get_random_triples, this, i);
+        }
+        for (unsigned int i= 0; i<players.size(); i++){
+          t[i].join();
+        }
+
+        for (vector<State>::iterator it = protocol_states.begin() ; it != protocol_states.end(); ++it){
+          (*it) = State::PRIVATE_INPUTS;
+        }
         break;
       }
 
       case State::PRIVATE_INPUTS: {
-        send_private_inputs(player_id);
-        protocol_states.at(player_id) = State::DATASET_ACCEPTED;
+        thread t[players.size()];
+        for (unsigned int i =0; i<players.size(); i++){
+          t[i] = thread(&Client::send_private_inputs, this, i);
+        }
+        for (unsigned int i=0; i<players.size(); i++){
+          t[i].join();
+        }
+        for (vector<State>::iterator it = protocol_states.begin() ; it != protocol_states.end(); ++it){
+          (*it) = State::DATASET_ACCEPTED;
+        }
         break;
       }
 

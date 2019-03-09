@@ -42,7 +42,7 @@ sedp::State sedp::Server::get_state(){
 }
 
 void sedp::Server::get_dataset_size() {
-  dataset_size = receive_int_from(clients.find(0)->second);     
+  dataset_size = receive_int_from(clients.find(0)->second);  
 }
 
 
@@ -52,22 +52,20 @@ void sedp::Server::send_random_triples() {
 
   sleep(3);
   int share, counter = dataset_size;
-  inpf.open("Player_data.txt");
+  inpf.open("Player_data" + to_string(player_id) +".txt");
   if (!inpf){
     cout << "Unable to open file." << endl;
     exit(-1);
   }
-  inpf >> share;
-  Shares.push_back(share);
 
   while (counter > 0) {
     inpf >> share;
-    cout << "Share " << share <<endl;
     Shares.push_back(share);
     send_int_to(clients.find(0)->second, share); // Need to send actuall shares!
     counter--;
   }
   inpf.close();
+  cout << " Succesfully sent my shares!"<<endl;
 }
 
 void sedp::Server::get_private_inputs() {
