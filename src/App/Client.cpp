@@ -33,13 +33,20 @@ int sedp::Client::connect_to_player(struct sockaddr_in addr) {
   return 1;
 }
 
-void sedp::Client::connect_to_players(vector <struct sockaddr_in> player_addresses){
-  int counter = 0;
+void sedp::Client::connect_to_players(vector <pair <string,int>> player_addresses){
   struct sockaddr_in addr;
-  while(counter < max_players){
-    addr = player_addresses.at(counter);
-    connect_to_player(addr);
-    counter++;
+  vector <struct sockaddr_in> Player_addresses; 
+  for (vector<pair <string,int>>::iterator it = player_addresses.begin() ; it != player_addresses.end(); ++it){
+    string IP = (*it).first;
+    int port = (*it).second;
+    bzero(&addr, sizeof(addr));
+    addr.sin_family= AF_INET;
+    addr.sin_addr.s_addr= INADDR_ANY;
+    addr.sin_port= htons(port);
+    Player_addresses.push_back(addr);
+  }
+  for (vector<struct sockaddr_in>::iterator it = Player_addresses.begin() ; it != Player_addresses.end(); ++it){
+    connect_to_player(*it);
   }
 
 }

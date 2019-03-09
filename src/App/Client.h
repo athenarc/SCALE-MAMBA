@@ -44,7 +44,7 @@ namespace sedp {
     int get_id();
     void run_protocol(int player_id); 
     int connect_to_player(struct sockaddr_in addr);
-    void connect_to_players(vector <struct sockaddr_in> p_addresses);
+    void connect_to_players(vector <pair <string,int>> p_addresses);
     void send_dataset_size(int player_id);
     void send_private_inputs(int player_id);
     void get_random_triples(int player_id);

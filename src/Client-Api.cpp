@@ -8,7 +8,7 @@ int main(int argc, const char *argv[]) {
 
   int id;
   sockaddr_in addr;
-  vector <struct sockaddr_in> Player_addresses; 
+  vector <pair<string,int>> player_addresses; 
 
   if (argc < 2) {
     cout << "Usage: ./Client-Api.x <client_id>" << endl;
@@ -21,16 +21,15 @@ int main(int argc, const char *argv[]) {
   Client c(id, max_players);
 
   int port = 14000;
+  pair<string,int> address;
   while (port < 14003){
-    bzero(&addr, sizeof(addr));
-    addr.sin_family= AF_INET;
-    addr.sin_addr.s_addr= INADDR_ANY;
-    addr.sin_port= htons(port);
-    Player_addresses.push_back(addr);
+    address.first = "172.0.0.1";
+    address.second = port;
+    player_addresses.push_back(address);
     port++;
   }
 
-  c.connect_to_players(Player_addresses);
+  c.connect_to_players(player_addresses);
   
   int counter = 0;
   while (counter < 3){
