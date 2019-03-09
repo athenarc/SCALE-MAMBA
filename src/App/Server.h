@@ -40,6 +40,7 @@ namespace sedp {
 
   public:
     ifstream inpf;
+    ofstream outf;
 
     Server(unsigned int id, unsigned int port, unsigned int max_clients);
 

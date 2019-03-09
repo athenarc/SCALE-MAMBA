@@ -7,7 +7,6 @@ using namespace sedp;
 int main(int argc, const char *argv[]) {
 
   int id;
-  sockaddr_in addr;
   vector <pair<string,int>> player_addresses; 
 
   if (argc < 2) {
@@ -31,8 +30,6 @@ int main(int argc, const char *argv[]) {
 
   c.connect_to_players(player_addresses);
   
-  unsigned int counter = 0;
-  c.run_protocol(counter);
-  counter++;
+  c.run_protocol();
   return 0;
 }

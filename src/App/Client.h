@@ -32,7 +32,7 @@ namespace sedp {
     unsigned int client_id;
     unsigned int max_players;
     vector <vector <int>> Shares;
-    vector<int> players;
+    vector<int> players, Mask, my_data;
     int dataset_size;
 
   public:
@@ -43,10 +43,11 @@ namespace sedp {
     ~Client();
     State get_state();
     int get_id();
-    void run_protocol(unsigned int player_id); 
+    void run_protocol(); 
     int connect_to_player(struct sockaddr_in addr);
     void connect_to_players(vector <pair <string,int>> p_addresses);
     void send_dataset_size();
+    void compute_mask();
     void send_private_inputs(int player_id);
     void get_random_triples(int player_id);
   };

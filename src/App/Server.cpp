@@ -73,16 +73,27 @@ void sedp::Server::get_private_inputs() {
   cout << "Importing data..." <<endl;
   sleep(3);
   int counter = 0;
-
+  outf.open("Player_out" + to_string(player_id) + ".txt");
+  if (!outf){
+    throw file_error("Unable to open out files...");
+  }
   while (counter < dataset_size){
     int datum = receive_int_from(clients.find(0)->second);
-    cout << datum << endl;
+    int secret_share;
+    if (player_id == 0){
+      secret_share = datum + Shares.at(counter);
+    }
+    else {
+      secret_share = Shares.at(counter);
+    }
+    outf << secret_share << endl;
     counter++;
   }
+  outf.close();
 }
 
 void sedp::Server::run_protocol() {
-  while(protocol_state != State::DATASET_ACCEPTED){
+  while(1){
     switch(protocol_state) {
       case State::INITIAL: {
         get_dataset_size();
@@ -103,7 +114,8 @@ void sedp::Server::run_protocol() {
       }
 
       case State::DATASET_ACCEPTED:{
-        break;
+        cout << "Import protocol completed!" << endl;
+        exit(1);
       }
 
     } // end switch
