@@ -30,13 +30,12 @@ int main(int argc, const char *argv[]) {
     port++;
   }
 
-  int f = c.connect_to_players(Player_addresses);
+  c.connect_to_players(Player_addresses);
   
-  if (f == -1){
-    exit(-1);
+  int counter = 0;
+  while (counter < 3){
+    c.run_protocol(counter);
+    counter++;
   }
-
-  c.run_protocol();
-  
   return 0;
 }

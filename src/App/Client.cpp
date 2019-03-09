@@ -33,7 +33,7 @@ int sedp::Client::connect_to_player(struct sockaddr_in addr) {
   return 1;
 }
 
-int sedp::Client::connect_to_players(vector <struct sockaddr_in> player_addresses){
+void sedp::Client::connect_to_players(vector <struct sockaddr_in> player_addresses){
   int counter = 0;
   struct sockaddr_in addr;
   while(counter < max_players){
@@ -44,35 +44,30 @@ int sedp::Client::connect_to_players(vector <struct sockaddr_in> player_addresse
 
 }
 
-sedp::State sedp::Client::get_state(){
-  return protocol_state;
-}
-
 int sedp::Client::get_id(){
   return client_id;
 }
 
-void sedp::Client::send_dataset_size() {
+void sedp::Client::send_dataset_size(int player_id) {
   cout << "Counting my dataset size..." << endl;
   dataset_size = 10;
-  send_int_to(players.at(0), dataset_size);
+  send_int_to(players.at(player_id), dataset_size);
 }
 
-void sedp::Client::send_private_inputs() {
+void sedp::Client::send_private_inputs(int player_id) {
 
   cout << "Sending private data..." <<endl;
   sleep(3);
   int counter = 0;
 
   while (counter < dataset_size) {
-    send_int_to(players.at(0), counter + counter);
+    send_int_to(players.at(player_id), counter + counter);
     counter++;
   }
 
 }
 
-
-void sedp::Client::get_random_triples() {
+void sedp::Client::get_random_triples(int player_id) {
 
   cout << "Listening for shares..." <<endl;
   sleep(3);
@@ -80,39 +75,39 @@ void sedp::Client::get_random_triples() {
   int counter = dataset_size;
 
   while (counter > 0){
-    int share = receive_int_from(players.at(0));
+    int share = receive_int_from(players.at(player_id));
     cout << share << endl;
     counter--;
   }
 
 }
 
-void sedp::Client::run_protocol() {
-  while(protocol_state != State::DATASET_ACCEPTED){
-    switch(protocol_state) {
+void sedp::Client::run_protocol(int player_id) {
+  protocol_states.push_back(State::INITIAL);
+  while(protocol_states.at(player_id) != State::DATASET_ACCEPTED){
+    switch(protocol_states.at(player_id)) {
       case State::INITIAL: {
-        send_dataset_size();
-        protocol_state = State::RANDOMNESS_SENT;
+        send_dataset_size(player_id);
+        protocol_states.at(player_id) = State::RANDOMNESS_SENT;
         break;
       }
 
       case State::RANDOMNESS_SENT: {
-        get_random_triples();
-        protocol_state = State::PRIVATE_INPUTS;
+        get_random_triples(player_id);
+        protocol_states.at(player_id) = State::PRIVATE_INPUTS;
         break;
       }
 
       case State::PRIVATE_INPUTS: {
-        send_private_inputs();
-        protocol_state = State::DATASET_ACCEPTED;
+        send_private_inputs(player_id);
+        protocol_states.at(player_id) = State::DATASET_ACCEPTED;
         break;
       }
 
-      case State::DATASET_ACCEPTED: {
-        cout << "Data has been sent!" <<endl;
+      case State::DATASET_ACCEPTED:{
         break;
       }
-
+      
     } // end switch
   } // end while-loop
 } // end run_protocol

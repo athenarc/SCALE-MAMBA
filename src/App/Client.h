@@ -28,7 +28,7 @@ namespace sedp {
   class Client: public ProtocolEntity {
   private:
     int socket_id;
-    State protocol_state = State::INITIAL;
+    vector <State> protocol_states;
     unsigned int client_id;
     unsigned int max_players;
     vector<int> players;
@@ -42,12 +42,12 @@ namespace sedp {
     ~Client();
     State get_state();
     int get_id();
-    void run_protocol(); 
+    void run_protocol(int player_id); 
     int connect_to_player(struct sockaddr_in addr);
-    int connect_to_players(vector <struct sockaddr_in> p_addresses);
-    void send_dataset_size();
-    void send_private_inputs();
-    void get_random_triples();
+    void connect_to_players(vector <struct sockaddr_in> p_addresses);
+    void send_dataset_size(int player_id);
+    void send_private_inputs(int player_id);
+    void get_random_triples(int player_id);
   };
 }
 

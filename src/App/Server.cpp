@@ -94,8 +94,7 @@ void sedp::Server::run_protocol() {
         break;
       }
 
-      case State::DATASET_ACCEPTED: {
-        cout << "Data has been imported." <<endl;
+      case State::DATASET_ACCEPTED:{
         break;
       }
 
