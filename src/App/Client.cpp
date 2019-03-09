@@ -70,7 +70,7 @@ void sedp::Client::compute_mask(){
 
 void sedp::Client::send_dataset_size() {
   int datum;
-  thread t[max_players];
+  vector <thread> t;
   cout << "Counting my dataset size..." << endl;
   sleep(1);
   inpf.open("Client_data" + to_string(client_id) + ".txt");
@@ -89,16 +89,16 @@ void sedp::Client::send_dataset_size() {
   inpf.close();
 
   for (unsigned int i =0; i<players.size(); i++){
-    t[i] = thread(&Client::send_int_to, this, players.at(i), dataset_size);
+    t.push_back(thread(&Client::send_int_to, this, players.at(i), dataset_size));
   }
   //wait for threads to finish
   for (unsigned int i =0; i<players.size(); i++){
-    t[i].join();
+    t.at(i).join();
   }
   cout << "Succesfully sent dataset size!" <<endl;
 
   // Initialize shares matrix
-  unsigned int counter = 0;
+  int counter = 0;
   while (counter < dataset_size){
     vector<int> v;
     for (unsigned int i =0; i<players.size(); i++){
@@ -153,12 +153,12 @@ void sedp::Client::run_protocol() {
       }
 
       case State::RANDOMNESS_SENT: {
-        thread t[players.size()];
+        vector <thread> t;
         for (unsigned int i = 0; i<players.size(); i++){
-          t[i] = thread(&Client::get_random_triples, this, i);
+          t.push_back(thread(&Client::get_random_triples, this, i));
         }
         for (unsigned int i= 0; i<players.size(); i++){
-          t[i].join();
+          t.at(i).join();
         }
 
         compute_mask();
@@ -170,12 +170,12 @@ void sedp::Client::run_protocol() {
       }
 
       case State::PRIVATE_INPUTS: {
-        thread t[players.size()];
+        vector <thread> t;
         for (unsigned int i =0; i<players.size(); i++){
-          t[i] = thread(&Client::send_private_inputs, this, i);
+          t.push_back(thread(&Client::send_private_inputs, this, i));
         }
         for (unsigned int i=0; i<players.size(); i++){
-          t[i].join();
+          t.at(i).join();
         }
         
         for (vector<State>::iterator it = protocol_states.begin() ; it != protocol_states.end(); ++it){
