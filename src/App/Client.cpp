@@ -27,8 +27,7 @@ int sedp::Client::connect_to_player(struct sockaddr_in addr) {
 
   if (connect(socket_id , (struct sockaddr *)&addr , sizeof(addr)) < 0)
 	{
-		perror("Connect failed. Error");
-    return -1;
+		throw Networking_error("Connection with Player has failed...");
 	}
 
   players.push_back(socket_id);
@@ -37,15 +36,15 @@ int sedp::Client::connect_to_player(struct sockaddr_in addr) {
   return 1;
 }
 
-void sedp::Client::connect_to_players(vector <pair <string,int>> player_addresses){
+void sedp::Client::connect_to_players(vector <pair <char*,int>> player_addresses){
   struct sockaddr_in addr;
   vector <struct sockaddr_in> Player_addresses; 
-  for (vector<pair <string,int>>::iterator it = player_addresses.begin() ; it != player_addresses.end(); ++it){
-    string IP = (*it).first;
+  for (vector<pair <char*,int>>::iterator it = player_addresses.begin() ; it != player_addresses.end(); ++it){
+    char* IP = (*it).first;
     int port = (*it).second;
     bzero(&addr, sizeof(addr));
     addr.sin_family= AF_INET;
-    addr.sin_addr.s_addr= INADDR_ANY;
+    addr.sin_addr.s_addr= inet_addr(IP);
     addr.sin_port= htons(port);
     Player_addresses.push_back(addr);
   }
