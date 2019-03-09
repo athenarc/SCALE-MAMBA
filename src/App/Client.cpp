@@ -68,6 +68,18 @@ void sedp::Client::send_dataset_size() {
     t[i].join();
   }
   cout << "Succesfully sent dataset size!" <<endl;
+
+  // Initialize shares matrix
+  unsigned int counter = 0;
+  while (counter < dataset_size){
+    vector<int> v;
+    for (unsigned int i =0; i<players.size(); i++){
+      v.push_back(0);
+    }
+    Shares.push_back(v);
+    counter++;
+  }
+
 }
 
 void sedp::Client::send_private_inputs(int player_id) {
@@ -89,12 +101,12 @@ void sedp::Client::get_random_triples(int player_id) {
   cout << "\nListening for shares of player" + to_string(player_id) + "..." <<endl;
   sleep(3);
 
-  int counter = dataset_size;
+  int counter = 0;
 
-  while (counter > 0){
+  while (counter < dataset_size){
     int share = receive_int_from(players.at(player_id));
-    cout << player_id << " " << share << endl;
-    counter--;
+    Shares.at(counter).at(player_id) = share;
+    counter++;
   }
   cout << "Succesfully received shares of player" + to_string(player_id) + "!" <<endl;
 }
@@ -123,6 +135,15 @@ void sedp::Client::run_protocol(unsigned int player_id) {
         for (unsigned int i= 0; i<players.size(); i++){
           t[i].join();
         }
+
+        // /* Uncomment below to check Shares are loaded properly */
+        // for (vector<vector <int>>::iterator it = Shares.begin() ; it != Shares.end(); ++it){
+        //     for (vector <int>::iterator it2 = (*it).begin() ; it2 != (*it).end(); ++it2){
+        //         cout << *it2 << " ";
+        //     }
+        //     cout << endl;
+        //   }
+
 
         for (vector<State>::iterator it = protocol_states.begin() ; it != protocol_states.end(); ++it){
           (*it) = State::PRIVATE_INPUTS;
