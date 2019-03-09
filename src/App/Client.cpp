@@ -83,6 +83,10 @@ void sedp::Client::get_random_triples(int player_id) {
 }
 
 void sedp::Client::run_protocol(int player_id) {
+  if (player_id >= players.size()){
+    perror("Not connected to a server with this id");
+    exit(-1);
+  }
   protocol_states.push_back(State::INITIAL);
   while(protocol_states.at(player_id) != State::DATASET_ACCEPTED){
     switch(protocol_states.at(player_id)) {

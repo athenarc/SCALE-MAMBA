@@ -31,6 +31,7 @@ namespace sedp {
   private:
     int socket_id;
     State protocol_state = State::INITIAL;
+    vector <int> Shares;
     unsigned int player_id;
     unsigned int port_number;
     unsigned int max_clients;

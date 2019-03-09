@@ -51,13 +51,23 @@ void sedp::Server::send_random_triples() {
   cout << "Sending my Shares..." << endl;
 
   sleep(3);
-  int counter = dataset_size;
+  int share, counter = dataset_size;
+  inpf.open("Player_data.txt");
+  if (!inpf){
+    cout << "Unable to open file." << endl;
+    exit(-1);
+  }
+  inpf >> share;
+  Shares.push_back(share);
 
   while (counter > 0) {
-    send_int_to(clients.find(0)->second, counter); // Need to send actuall shares!
+    inpf >> share;
+    cout << "Share " << share <<endl;
+    Shares.push_back(share);
+    send_int_to(clients.find(0)->second, share); // Need to send actuall shares!
     counter--;
   }
-
+  inpf.close();
 }
 
 void sedp::Server::get_private_inputs() {
