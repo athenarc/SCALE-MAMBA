@@ -42,7 +42,18 @@ sedp::State sedp::Server::get_state(){
 }
 
 void sedp::Server::get_dataset_size() {
-  dataset_size = receive_int_from(clients.find(0)->second);  
+  dataset_size = receive_int_from(clients.find(0)->second); 
+  // Choose random triplet shares and output into a Player_data file
+  outf.open("Player_" + to_string(player_id) +"_random_shares.txt");
+  if (!outf) {
+    throw file_error("Unable to open file...");
+  }
+  int counter = 0;
+  while (counter < dataset_size){
+    outf << rand() % 1000000 << endl;
+    counter++;
+  }
+  outf.close();
 }
 
 
@@ -52,7 +63,7 @@ void sedp::Server::send_random_triples() {
 
   sleep(3);
   int share, counter = dataset_size;
-  inpf.open("Player_data" + to_string(player_id) +".txt");
+  inpf.open("Player_" + to_string(player_id) +"_random_shares.txt");
   if (!inpf){
     cout << "Unable to open file." << endl;
     exit(-1);
