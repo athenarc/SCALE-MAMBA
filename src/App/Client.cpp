@@ -1,5 +1,7 @@
 #include <thread>
+#include <mutex>
 #include "Client.h"
+
 
 sedp::Client::Client(unsigned int id, unsigned int max_players):
   client_id{id}, max_players{max_players}, dataset_size{0}
@@ -130,10 +132,11 @@ void sedp::Client::get_random_triples(int player_id) {
   sleep(3);
 
   int counter = 0;
-
   while (counter < dataset_size){
     int share = receive_int_from(players.at(player_id));
+    Shares_mutex.lock();
     Shares.at(counter).at(player_id) = share;
+    Shares_mutex.unlock();
     counter++;
   }
   cout << "Succesfully received shares of player" + to_string(player_id) + "!" <<endl;
@@ -142,7 +145,7 @@ void sedp::Client::get_random_triples(int player_id) {
 void sedp::Client::run_protocol() {
   
 
-  while(1){
+  while(protocol_state != State::DATASET_ACCEPTED){
     switch(protocol_state) {
       case State::INITIAL: {
         send_dataset_size();
@@ -152,6 +155,7 @@ void sedp::Client::run_protocol() {
 
       case State::RANDOMNESS_SENT: {
         vector <thread> t;
+        mutex Shares_mutex;
         for (unsigned int i = 0; i<players.size(); i++){
           t.push_back(thread(&Client::get_random_triples, this, i));
         }
@@ -180,8 +184,7 @@ void sedp::Client::run_protocol() {
       }
 
       case State::DATASET_ACCEPTED:{
-        cout << "Import Protocol completed!" << endl;
-        exit(1);
+        break;
       }
       
     } // end switch

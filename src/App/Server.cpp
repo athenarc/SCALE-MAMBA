@@ -104,7 +104,7 @@ void sedp::Server::get_private_inputs() {
 }
 
 void sedp::Server::run_protocol() {
-  while(1){
+  while(protocol_state != State::DATASET_ACCEPTED){
     switch(protocol_state) {
       case State::INITIAL: {
         get_dataset_size();
@@ -125,8 +125,7 @@ void sedp::Server::run_protocol() {
       }
 
       case State::DATASET_ACCEPTED:{
-        cout << "Import protocol completed!" << endl;
-        exit(1);
+        break;
       }
 
     } // end switch

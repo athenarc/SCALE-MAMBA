@@ -31,9 +31,11 @@ namespace sedp {
     State protocol_state = State::INITIAL;
     unsigned int client_id;
     unsigned int max_players;
+    mutex Shares_mutex;
     vector <vector <int>> Shares;
     vector<int> players, Mask, my_data;
     int dataset_size;
+
 
   public:
     ifstream inpf;
