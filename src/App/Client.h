@@ -28,7 +28,7 @@ namespace sedp {
   class Client: public ProtocolEntity {
   private:
     int socket_id;
-    vector <State> protocol_states;
+    State protocol_state = State::INITIAL;
     unsigned int client_id;
     unsigned int max_players;
     vector <vector <int>> Shares;

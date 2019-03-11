@@ -147,17 +147,12 @@ void sedp::Client::get_random_triples(int player_id) {
 
 void sedp::Client::run_protocol() {
   
-  protocol_states.push_back(State::INITIAL);
 
   while(1){
-    switch(protocol_states.at(0)) {
+    switch(protocol_state) {
       case State::INITIAL: {
         send_dataset_size();
-
-        for (vector<State>::iterator it = protocol_states.begin() ; it != protocol_states.end(); ++it){
-          (*it) = State::RANDOMNESS_SENT;
-        }
-
+        protocol_state = State::RANDOMNESS_SENT;
         break;
       }
 
@@ -171,10 +166,8 @@ void sedp::Client::run_protocol() {
         }
 
         compute_mask();
-        
-        for (vector<State>::iterator it = protocol_states.begin() ; it != protocol_states.end(); ++it){
-          (*it) = State::PRIVATE_INPUTS;
-        }
+        protocol_state = State::PRIVATE_INPUTS;
+
         break;
       }
 
@@ -187,9 +180,8 @@ void sedp::Client::run_protocol() {
           t.at(i).join();
         }
         
-        for (vector<State>::iterator it = protocol_states.begin() ; it != protocol_states.end(); ++it){
-          (*it) = State::DATASET_ACCEPTED;
-        }
+        protocol_state = State::DATASET_ACCEPTED;
+        
         break;
       }
 
