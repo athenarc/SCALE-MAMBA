@@ -18,5 +18,7 @@ int main(int argc, const char *argv[]) {
 
   Server s(id, 14000 + id, max_clients);
   s.accept_clients();
+  // use clock as seed
+  srand(time(0)+id);
   s.run_protocol();
 } 

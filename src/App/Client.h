@@ -31,22 +31,27 @@ namespace sedp {
     State protocol_state = State::INITIAL;
     unsigned int client_id;
     unsigned int max_players;
-    vector<int> players;
+    mutex Shares_mutex;
+    vector <vector <int>> Shares;
+    vector<int> players, Mask, my_data;
     int dataset_size;
+
 
   public:
     ifstream inpf;
 
-    Client(unsigned int id, unsigned int max_clients);
+    Client(unsigned int id, unsigned int max_players);
     
     ~Client();
     State get_state();
     int get_id();
     void run_protocol(); 
-    int connect_to_player(const string& ip_address, int port);
+    int connect_to_player(string ip, int port);
+    void connect_to_players(const vector <pair <string, int>>& p_addresses);
     void send_dataset_size();
-    void send_private_inputs();
-    void get_random_triples();
+    void compute_mask();
+    void send_private_inputs(int player_id);
+    void get_random_triples(int player_id);
   };
 }
 

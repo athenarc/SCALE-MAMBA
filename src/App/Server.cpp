@@ -42,7 +42,18 @@ sedp::State sedp::Server::get_state(){
 }
 
 void sedp::Server::get_dataset_size() {
-  dataset_size = receive_int_from(clients.find(0)->second);     
+  dataset_size = receive_int_from(clients.find(0)->second); 
+  // Choose random triplet shares and output into a Player_data file
+  outf.open("Player_" + to_string(player_id) +"_random_shares.txt");
+  if (!outf) {
+    throw file_error("Unable to open file...");
+  }
+  int counter = 0;
+  while (counter < dataset_size){
+    outf << rand() % 1000000 << endl;
+    counter++;
+  }
+  outf.close();
 }
 
 
@@ -51,13 +62,21 @@ void sedp::Server::send_random_triples() {
   cout << "Sending my Shares..." << endl;
 
   sleep(3);
-  int counter = dataset_size;
-
-  while (counter > 0) {
-    send_int_to(clients.find(0)->second, counter); // Need to send actuall shares!
-    counter--;
+  int share, counter = dataset_size;
+  inpf.open("Player_" + to_string(player_id) +"_random_shares.txt");
+  if (!inpf){
+    cout << "Unable to open file." << endl;
+    exit(-1);
   }
 
+  while (counter > 0) {
+    inpf >> share;
+    Shares.push_back(share);
+    send_int_to(clients.find(0)->second, share); // Need to send actuall shares!
+    counter--;
+  }
+  inpf.close();
+  cout << " Succesfully sent my shares!"<<endl;
 }
 
 void sedp::Server::get_private_inputs() {
@@ -65,12 +84,23 @@ void sedp::Server::get_private_inputs() {
   cout << "Importing data..." <<endl;
   sleep(3);
   int counter = 0;
-
+  outf.open("Player_out" + to_string(player_id) + ".txt");
+  if (!outf){
+    throw file_error("Unable to open out files...");
+  }
   while (counter < dataset_size){
     int datum = receive_int_from(clients.find(0)->second);
-    cout << datum << endl;
+    int secret_share;
+    if (player_id == 0){
+      secret_share = datum + Shares.at(counter);
+    }
+    else {
+      secret_share = Shares.at(counter);
+    }
+    outf << secret_share << endl;
     counter++;
   }
+  outf.close();
 }
 
 void sedp::Server::run_protocol() {
@@ -94,8 +124,7 @@ void sedp::Server::run_protocol() {
         break;
       }
 
-      case State::DATASET_ACCEPTED: {
-        cout << "Data has been imported." <<endl;
+      case State::DATASET_ACCEPTED:{
         break;
       }
 
