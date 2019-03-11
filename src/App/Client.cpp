@@ -33,16 +33,10 @@ int sedp::Client::connect_to_player(string ip, int port) {
   addr.sin_addr.s_addr = inet_addr(ip.c_str());
   addr.sin_port = htons(port);
 
-  int counter = 0;
-  while ( (connect(socket_id , (struct sockaddr *)&addr , sizeof(addr))<0) && (counter < 60)){
-    if (counter % 5 == 0) {cout << "Trying to connect..."<< endl;}
-    sleep(1);
-    counter++;
+  if (connect(socket_id , (struct sockaddr *)&addr , sizeof(addr))<0){
+    throw Networking_error("Connection with Player has failed...");
   }
-  
-  if (counter>= 60){
-		throw Networking_error("Connection with Player has failed...");
-	}
+ 
 
   send_int_to(socket_id, client_id);
   cout << "Connected to player " << receive_int_from(socket_id) << endl;
