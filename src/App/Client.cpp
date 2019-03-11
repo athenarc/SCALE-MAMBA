@@ -10,13 +10,15 @@ sedp::Client::Client(unsigned int id, unsigned int max_players):
 
 sedp::Client::~Client() {
   cout << "Closing client..." << endl;
+
   for (vector<int>::iterator it = players.begin() ; it != players.end(); ++it){
     close(*it);
   }
+
   cout << "Client closed!"<<endl;
 }
 
-int sedp::Client::connect_to_player(struct sockaddr_in addr) {
+int sedp::Client::connect_to_player(string ip, int port) {
   
   int socket_id = socket(AF_INET , SOCK_STREAM , 0);
 
@@ -25,31 +27,29 @@ int sedp::Client::connect_to_player(struct sockaddr_in addr) {
     throw Networking_error("Receiving error - 1");
 	}
 
+  struct sockaddr_in addr;
+  memset(&addr, 0, sizeof(addr));
+  addr.sin_family = AF_INET;
+  addr.sin_addr.s_addr = inet_addr(ip.c_str());
+  addr.sin_port = htons(port);
+
   if (connect(socket_id , (struct sockaddr *)&addr , sizeof(addr)) < 0)
 	{
 		throw Networking_error("Connection with Player has failed...");
 	}
 
-  players.push_back(socket_id);
   send_int_to(socket_id, client_id);
   cout << "Connected to player " << receive_int_from(socket_id) << endl;
-  return 1;
+
+  return socket_id;
 }
 
-void sedp::Client::connect_to_players(vector <pair <char*,int>> player_addresses){
-  struct sockaddr_in addr;
-  vector <struct sockaddr_in> Player_addresses; 
-  for (vector<pair <char*,int>>::iterator it = player_addresses.begin() ; it != player_addresses.end(); ++it){
-    char* IP = (*it).first;
-    int port = (*it).second;
-    bzero(&addr, sizeof(addr));
-    addr.sin_family= AF_INET;
-    addr.sin_addr.s_addr= inet_addr(IP);
-    addr.sin_port= htons(port);
-    Player_addresses.push_back(addr);
-  }
-  for (vector<struct sockaddr_in>::iterator it = Player_addresses.begin() ; it != Player_addresses.end(); ++it){
-    connect_to_player(*it);
+void sedp::Client::connect_to_players(const vector <pair <string, int>>& player_addresses){
+  vector<pair <string, int>>::const_iterator it;
+
+  for (it = player_addresses.begin() ; it != player_addresses.end(); ++it){
+    int player_sd = connect_to_player((*it).first, (*it).second);
+    players.push_back(player_sd);
   }
 
 }
@@ -142,13 +142,16 @@ void sedp::Client::get_random_triples(int player_id) {
 void sedp::Client::run_protocol() {
   
   protocol_states.push_back(State::INITIAL);
+
   while(1){
     switch(protocol_states.at(0)) {
       case State::INITIAL: {
         send_dataset_size();
+
         for (vector<State>::iterator it = protocol_states.begin() ; it != protocol_states.end(); ++it){
           (*it) = State::RANDOMNESS_SENT;
         }
+
         break;
       }
 
