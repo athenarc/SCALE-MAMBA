@@ -6,22 +6,21 @@ using namespace sedp;
 
 int main(int argc, const char *argv[]) {
 
-  int id;
+  int id, n_players;
   vector <pair<string, int>> player_addresses; 
 
-  if (argc < 2) {
-    cout << "Usage: ./Client-Api.x <client_id>" << endl;
+  if (argc < 3) {
+    cout << "Usage: ./Client-Api.x <client_id> <n_players>" << endl;
     exit(-1);
   }
 
   id = atoi(argv[1]);
-  int max_players = 3;
+  n_players = atoi(argv[2]);
 
-  Client c(id, max_players);
-
+  Client c(id, n_players);
   int port = 14000;
 
-  while (port < 14003){
+  while (port < 14000 + n_players){
     player_addresses.push_back(make_pair("127.0.0.1", port));
     port++;
   }
