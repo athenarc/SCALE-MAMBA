@@ -1,5 +1,5 @@
 #ifndef _ProtocolEntity
-#define __ProtocolEntity
+#define _ProtocolEntity
 
 #include <cstdint>
 #include <sys/socket.h>
