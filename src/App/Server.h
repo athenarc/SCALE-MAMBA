@@ -15,6 +15,12 @@
 #include <fstream>
 #include <iterator> 
 #include <map>
+#include <thread>
+#include <string>
+#include <chrono>
+#include <thread>
+#include <mutex>
+#include <future>
 
 #include "System/Networking.h"
 #include "Exceptions/Exceptions.h"
@@ -22,21 +28,25 @@
 
 #include "Protocol.h"
 #include "ProtocolEntity.h"
+#include "Concurrent_Queue.h"
 
 using namespace std;
-
 
 namespace sedp {
   class Server: public ProtocolEntity {
   private:
     int socket_id;
     State protocol_state = State::INITIAL;
-    vector <int> Shares;
     unsigned int player_id;
     unsigned int port_number;
     unsigned int max_clients;
-    map<int, int> clients;
-    int dataset_size;
+    unsigned int current_num_of_clients;
+    thread accept_thread;
+    thread handler_thread;
+    mutex mtx;
+    Concurrent_Queue<shared_future<void>> pending_clients;
+
+    void handle_clients ();
 
   public:
     ifstream inpf;
@@ -45,13 +55,9 @@ namespace sedp {
     Server(unsigned int id, unsigned int port, unsigned int max_clients);
 
     ~Server();
-    State get_state();
-    void start();
-    void run_protocol(); 
+    void init();
     void accept_clients();
-    void send_random_triples();
-    void get_private_inputs();
-    void get_dataset_size();
+    int accept_single_client();
   };
 }
 

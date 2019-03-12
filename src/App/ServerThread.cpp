@@ -1,7 +1,9 @@
 #include "ServerThread.h"
 
 sedp::ServerThread::ServerThread(int client_sd, int player_id):
-  ProtocolEntity(), client_sd{client_sd}, player_id{player_id}, dataset_size{0} {}
+  ProtocolEntity(), client_sd{client_sd}, player_id{player_id}, dataset_size{0} {
+    cout << "Server thread created: " << client_sd << ", " << player_id << endl;
+  }
 
 sedp::ServerThread::~ServerThread() {
   cout << "Closing ServerThread...." << endl;
@@ -16,7 +18,7 @@ void sedp::ServerThread::handshake() {
 }
 
 void sedp::ServerThread::get_dataset_size() {
-  dataset_size = receive_int_from(client_sd); 
+  dataset_size = receive_int_from(client_sd);
 
   int counter = 0;
 
@@ -33,7 +35,7 @@ void sedp::ServerThread::send_random_triples() {
   cout << "Sending my Shares..." << endl;
   sleep(3);
 
-  int share, counter = dataset_size;
+  int counter = dataset_size - 1;
 
   while (counter > 0) {
     send_int_to(client_sd, shares.at(counter)); // Need to send actuall shares!
@@ -63,7 +65,7 @@ void sedp::ServerThread::get_private_inputs() {
 }
 
 void sedp::ServerThread::run_protocol() {
-  while(protocol_state != State::DATASET_ACCEPTED){
+  while(protocol_state != State::DATASET_ACCEPTED) {
     switch(protocol_state) {
       case State::INITIAL: {
         handshake();

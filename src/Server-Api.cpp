@@ -16,9 +16,9 @@ int main(int argc, const char *argv[]) {
 
   id = atoi(argv[1]);
 
-  Server s(id, 14000 + id, max_clients);
-  s.accept_clients();
   // use clock as seed
-  srand(time(0)+id);
-  s.run_protocol();
+  srand(time(0) + id);
+
+  Server s(id, 14000 + id, max_clients);
+  s.init();
 } 
