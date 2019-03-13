@@ -37,13 +37,15 @@ namespace sedp {
     mutex mtx;
     vector <vector <int>> shares;
     vector<int> players, data, masked_data;
-
+    
+    template <typename F>
+    void execute(F cb);
 
   public:
     ifstream inpf;
 
     Client(unsigned int id, unsigned int max_players);
-    
+
     ~Client();
     State get_state();
     int get_id();
@@ -59,5 +61,17 @@ namespace sedp {
   };
 }
 
+template <typename F>
+void sedp::Client::execute(F cb) {
+  vector<future<void>> res;
+
+  for (unsigned int i = 0; i < players.size(); i++) {
+    res.push_back(async(launch::async, cb, this, i));
+  }
+
+  for (auto& r : res) {
+    r.get(); // wait for all calls to finish
+  }
+}
 
 #endif

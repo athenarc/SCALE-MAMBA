@@ -117,53 +117,26 @@ void sedp::Client::get_random_triples(int player_id) {
     shares.at(i).at(player_id) = share;
   }
 
-  cout << "Succesfully received shares of player" + to_string(player_id) + "!" << endl;
+  cout << "Succesfully received shares of player " + to_string(player_id) + "!" << endl;
 }
 
 void sedp::Client::run_protocol() {
   while(protocol_state != State::DATASET_ACCEPTED) {
     switch(protocol_state) {
       case State::INITIAL: {
-        vector<future<void>> res;
-
-        for (unsigned int i = 0; i < players.size(); i++) {
-          res.push_back(async(launch::async, &Client::handshake, this, i));
-        }
-
-        for (auto& r : res) {
-          r.get(); // wait for all calls to finish
-        }
-        
+        execute(&Client::handshake);
         protocol_state= State::HANDSHAKE;
         break;
       }
 
       case State::HANDSHAKE: {
-        vector<future<void>> res;
-
-        for (unsigned int i = 0; i < players.size(); i++) {
-          res.push_back(async(launch::async, &Client::send_dataset_size, this, i));
-        }
-
-        for (auto& r : res) {
-          r.get(); // wait for all calls to finish
-        }
-
+        execute(&Client::send_dataset_size);
         protocol_state = State::RANDOMNESS_SENT;
         break;
       }
 
       case State::RANDOMNESS_SENT: {
-        vector<future<void>> res;
-
-        for (unsigned int i = 0; i < players.size(); i++) {
-          res.push_back(async(launch::async, &Client::get_random_triples, this, i));
-        }
-
-        for (auto& r : res) {
-          r.get(); // wait for all calls to finish
-        }
-
+        execute(&Client::get_random_triples);
         compute_mask();
         protocol_state = State::PRIVATE_INPUTS;
 
@@ -171,16 +144,7 @@ void sedp::Client::run_protocol() {
       }
 
       case State::PRIVATE_INPUTS: {
-        vector<future<void>> res;
-
-        for (unsigned int i = 0; i < players.size(); i++) {
-          res.push_back(async(launch::async, &Client::send_private_inputs, this, i));
-        }
-
-        for (auto& r : res) {
-          r.get(); // wait for all calls to finish
-        }
-
+        execute(&Client::send_private_inputs);
         protocol_state = State::DATASET_ACCEPTED;
         
         break;
