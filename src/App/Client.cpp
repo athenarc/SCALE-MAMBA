@@ -23,9 +23,9 @@ sedp::Client::~Client() {
 int sedp::Client::connect_to_player(string ip, int port) {
   
   int socket_id = OpenConnection(ip, port);
-
+ 
   return socket_id;
-	}
+}
 
 void sedp::Client::handshake(int player_id){
   send_int_to(players.at(player_id), client_id);
@@ -135,6 +135,21 @@ void sedp::Client::run_protocol() {
   while(protocol_state != State::DATASET_ACCEPTED){
     switch(protocol_state) {
       case State::INITIAL: {
+        vector <thread> t;
+
+        for (unsigned int i = 0; i<players.size(); i++){
+          t.push_back(thread(&Client::handshake, this, i));
+        }
+
+        for (unsigned int i= 0; i<players.size(); i++){
+          t.at(i).join();
+        }
+
+        protocol_state = State::HANDSHAKE;
+        break;
+      }
+
+      case State::HANDSHAKE: {
         send_dataset_size();
         protocol_state = State::RANDOMNESS_SENT;
         break;
