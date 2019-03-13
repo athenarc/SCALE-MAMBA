@@ -20,11 +20,8 @@ void sedp::ServerThread::handshake() {
 void sedp::ServerThread::get_dataset_size() {
   dataset_size = receive_int_from(client_sd);
 
-  int counter = 0;
-
-  while (counter < dataset_size){
+  for (int i = 0; i < dataset_size; i++) {
     shares.push_back(rand() % 1000000);
-    counter++;
   }
 
   outf.close();
@@ -35,32 +32,25 @@ void sedp::ServerThread::send_random_triples() {
   cout << "Sending my Shares..." << endl;
   sleep(3);
 
-  int counter = dataset_size - 1;
-
-  while (counter > 0) {
-    send_int_to(client_sd, shares.at(counter)); // Need to send actuall shares!
-    counter--;
+  for (int i = 0; i < dataset_size; i++) {
+    send_int_to(client_sd, shares.at(i)); // Need to send actuall shares!
   }
 
-  cout << " Succesfully sent my shares!"<<endl;
+  cout << " Succesfully sent my shares!" << endl;
 }
 
 void sedp::ServerThread::get_private_inputs() {
 
-  cout << "Importing data..." <<endl;
+  cout << "Importing data..." << endl;
   sleep(3);
 
-  int counter = 0;
-  outf.open("Player_out" + to_string(player_id) + ".txt");
-
-  while (counter < dataset_size){
+  for (int i = 0; i < dataset_size; i++) {
     int datum = receive_int_from(client_sd);
     int secret_share;
     
-    secret_share = datum + shares.at(counter);
+    secret_share = datum + shares.at(i);
 
     data.push_back(secret_share);
-    counter++;
   }
 }
 
