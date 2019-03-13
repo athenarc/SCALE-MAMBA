@@ -118,11 +118,12 @@ void sedp::Client::get_random_triples(int player_id) {
   sleep(3);
 
   int counter = 0;
-  while (counter < dataset_size){
+
+  while (counter < dataset_size - 1){
     int share = receive_int_from(players.at(player_id));
-    Shares_mutex.lock();
+    shares_mutex.lock();
     Shares.at(counter).at(player_id) = share;
-    Shares_mutex.unlock();
+    shares_mutex.unlock();
     counter++;
   }
   cout << "Succesfully received shares of player" + to_string(player_id) + "!" <<endl;

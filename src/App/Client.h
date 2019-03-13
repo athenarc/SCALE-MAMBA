@@ -14,6 +14,7 @@
 #include <string.h>
 #include <App/App.h>
 #include <fstream>
+#include <mutex>
 
 #include "System/Networking.h"
 #include "Exceptions/Exceptions.h"
@@ -27,11 +28,10 @@ using namespace std;
 namespace sedp {
   class Client: public ProtocolEntity {
   private:
-    int socket_id;
     State protocol_state = State::INITIAL;
     unsigned int client_id;
     unsigned int max_players;
-    mutex Shares_mutex;
+    mutex shares_mutex;
     vector <vector <int>> Shares;
     vector<int> players, Mask, my_data;
     int dataset_size;
@@ -45,7 +45,7 @@ namespace sedp {
     ~Client();
     State get_state();
     int get_id();
-    void run_protocol(); 
+    void run_protocol();
     void handshake(int player_id);
     int connect_to_player(string ip, int port);
     void connect_to_players(const vector <pair <string, int>>& p_addresses);
