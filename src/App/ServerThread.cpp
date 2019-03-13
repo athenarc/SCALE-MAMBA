@@ -2,7 +2,7 @@
 
 sedp::ServerThread::ServerThread(int client_sd, int player_id):
   ProtocolEntity(), client_sd{client_sd}, player_id{player_id}, dataset_size{0} {
-    cout << "Server thread created: " << client_sd << ", " << player_id << endl;
+    cout << "Server thread created: Client id: " << client_sd << ", Player id: " << player_id << endl;
   }
 
 sedp::ServerThread::~ServerThread() {
