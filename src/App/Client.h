@@ -15,6 +15,8 @@
 #include <App/App.h>
 #include <fstream>
 #include <mutex>
+#include <thread>
+#include <future>
 
 #include "System/Networking.h"
 #include "Exceptions/Exceptions.h"
@@ -31,10 +33,10 @@ namespace sedp {
     State protocol_state = State::INITIAL;
     unsigned int client_id;
     unsigned int max_players;
-    mutex shares_mutex;
-    vector <vector <int>> Shares;
-    vector<int> players, Mask, my_data;
     int dataset_size;
+    mutex mtx;
+    vector <vector <int>> shares;
+    vector<int> players, data, masked_data;
 
 
   public:
@@ -49,10 +51,11 @@ namespace sedp {
     void handshake(int player_id);
     int connect_to_player(string ip, int port);
     void connect_to_players(const vector <pair <string, int>>& p_addresses);
-    void send_dataset_size();
+    void send_dataset_size(int player_id);
     void compute_mask();
     void send_private_inputs(int player_id);
     void get_random_triples(int player_id);
+    void init();
   };
 }
 

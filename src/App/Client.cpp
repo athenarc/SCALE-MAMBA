@@ -20,6 +20,35 @@ sedp::Client::~Client() {
   cout << "Client closed!"<<endl;
 }
 
+void sedp::Client::init() {
+  int datum;
+
+  inpf.open("Client_data" + to_string(client_id) + ".txt");
+
+  if (!inpf){
+    throw file_error("Unable to read file..");
+  }
+
+  while (inpf >> datum) {
+    data.push_back(datum);
+  }
+
+  inpf.close();
+  dataset_size = data.size();
+  cout << "Dataset size: " << dataset_size << endl;
+
+  // Initialize shares matrix
+  for (int i = 0; i < dataset_size; i++) {
+    vector<int> v;
+
+    for (unsigned int j = 0; j < max_players; j++) {
+      v.push_back(0);
+    }
+
+    shares.push_back(v);
+  }
+}
+
 int sedp::Client::connect_to_player(string ip, int port) {
   
   int socket_id = OpenConnection(ip, port);
@@ -27,15 +56,16 @@ int sedp::Client::connect_to_player(string ip, int port) {
   return socket_id;
 }
 
-void sedp::Client::handshake(int player_id){
+void sedp::Client::handshake(int player_id) {
+  lock_guard<mutex> g{mtx};
   send_int_to(players.at(player_id), client_id);
-  cout << "Connected to player " << receive_int_from(players.at(player_id)) << endl;
+  receive_int_from(players.at(player_id));
 }
 
-void sedp::Client::connect_to_players(const vector <pair <string, int>>& player_addresses){
+void sedp::Client::connect_to_players(const vector <pair <string, int>>& player_addresses) {
   vector<pair <string, int>>::const_iterator it;
 
-  for (it = player_addresses.begin() ; it != player_addresses.end(); ++it){
+  for (it = player_addresses.begin() ; it != player_addresses.end(); ++it) {
     int player_sd = connect_to_player((*it).first, (*it).second);
     players.push_back(player_sd);
   }
@@ -46,123 +76,92 @@ int sedp::Client::get_id(){
   return client_id;
 }
 
-void sedp::Client::compute_mask(){
-  for (vector<vector <int>>::iterator it = Shares.begin() ; it != Shares.end(); ++it){
-        int mask = 0;
-        for (vector <int>::iterator it2 = (*it).begin() ; it2 != (*it).end(); ++it2){
-          mask = mask + *it2;
-        }
-      Mask.push_back(mask);
+void sedp::Client::compute_mask() {
+  for (vector<vector <int>>::iterator it = shares.begin() ; it != shares.end(); ++it){
+    int mask = 0;
+
+    for (vector <int>::iterator it2 = (*it).begin() ; it2 != (*it).end(); ++it2){
+      mask = mask + *it2;
     }
+
+    masked_data.push_back(mask);
+  }
 }
 
-void sedp::Client::send_dataset_size() {
-  int datum;
-  vector <thread> t;
-  cout << "Counting my dataset size..." << endl;
-  sleep(1);
-  inpf.open("Client_data" + to_string(client_id) + ".txt");
-  if (!inpf){
-    throw file_error("Unable to read file..");
-  }
-  inpf >> datum;
-  my_data.push_back(datum);
-  dataset_size++;
-
-  while (!inpf.eof()){
-    inpf >> datum;
-    my_data.push_back(datum);
-    dataset_size++;
-  }
-  inpf.close();
-
-  for (unsigned int i =0; i<players.size(); i++){
-    t.push_back(thread(&Client::send_int_to, this, players.at(i), dataset_size));
-  }
-  //wait for threads to finish
-  for (unsigned int i =0; i<players.size(); i++){
-    t.at(i).join();
-  }
+void sedp::Client::send_dataset_size(int player_id) {
+  lock_guard<mutex> g{mtx};
+  send_int_to(players.at(player_id), dataset_size);
   cout << "Succesfully sent dataset size!" <<endl;
-
-  // Initialize shares matrix
-  int counter = 0;
-  while (counter < dataset_size){
-    vector<int> v;
-    for (unsigned int i =0; i<players.size(); i++){
-      v.push_back(0);
-    }
-    Shares.push_back(v);
-    counter++;
-  }
-
 }
 
 void sedp::Client::send_private_inputs(int player_id) {
-
-  cout << "Sending private data..." <<endl;
+  lock_guard<mutex> g{mtx};
+  cout << "Sending private data..." << endl;
   sleep(3);
-  int counter = 0;
 
-  while (counter < dataset_size) {
-    send_int_to(players.at(player_id), my_data.at(counter) - Mask.at(counter));
-    counter++;
+  for (int i = 0; i < dataset_size; i++) {
+    send_int_to(players.at(player_id), data.at(i) - masked_data.at(i));
   }
-  cout << "\nSuccesfully sent my data to player " + to_string(player_id) + "!" <<endl;
+
+  cout << "\nSuccesfully sent my data to player " + to_string(player_id) + "!" << endl;
 
 }
 
 void sedp::Client::get_random_triples(int player_id) {
-
-  cout << "\nListening for shares of player" + to_string(player_id) + "..." <<endl;
+  lock_guard<mutex> g{mtx};
+  cout << "\nListening for shares of player " + to_string(player_id) + "..." << endl;
   sleep(3);
 
-  int counter = 0;
-
-  while (counter < dataset_size - 1){
+  for (int i = 0; i < dataset_size; i++) {
     int share = receive_int_from(players.at(player_id));
-    shares_mutex.lock();
-    Shares.at(counter).at(player_id) = share;
-    shares_mutex.unlock();
-    counter++;
+    shares.at(i).at(player_id) = share;
   }
-  cout << "Succesfully received shares of player" + to_string(player_id) + "!" <<endl;
+
+  cout << "Succesfully received shares of player" + to_string(player_id) + "!" << endl;
 }
 
 void sedp::Client::run_protocol() {
-  
-
-  while(protocol_state != State::DATASET_ACCEPTED){
+  while(protocol_state != State::DATASET_ACCEPTED) {
     switch(protocol_state) {
       case State::INITIAL: {
-        vector <thread> t;
+        vector<future<void>> res;
 
-        for (unsigned int i = 0; i<players.size(); i++){
-          t.push_back(thread(&Client::handshake, this, i));
+        for (unsigned int i = 0; i < players.size(); i++) {
+          res.push_back(async(launch::async, &Client::handshake, this, i));
         }
 
-        for (unsigned int i= 0; i<players.size(); i++){
-          t.at(i).join();
+        for (auto& r : res) {
+          r.get(); // wait for all calls to finish
         }
-
-        protocol_state = State::HANDSHAKE;
+        
+        protocol_state= State::HANDSHAKE;
         break;
       }
 
       case State::HANDSHAKE: {
-        send_dataset_size();
+        vector<future<void>> res;
+
+        for (unsigned int i = 0; i < players.size(); i++) {
+          res.push_back(async(launch::async, &Client::send_dataset_size, this, i));
+        }
+
+        for (auto& r : res) {
+          r.get(); // wait for all calls to finish
+        }
+
         protocol_state = State::RANDOMNESS_SENT;
         break;
       }
 
       case State::RANDOMNESS_SENT: {
-        vector <thread> t;
-        mutex Shares_mutex;
-        for (unsigned int i = 0; i<players.size(); i++){
-          t.push_back(thread(&Client::get_random_triples, this, i));
+        vector<future<void>> res;
+
+        for (unsigned int i = 0; i < players.size(); i++) {
+          res.push_back(async(launch::async, &Client::get_random_triples, this, i));
         }
-        for (unsigned int i= 0; i<players.size(); i++){
-          t.at(i).join();
+
+        for (auto& r : res) {
+          r.get(); // wait for all calls to finish
         }
 
         compute_mask();
@@ -172,14 +171,16 @@ void sedp::Client::run_protocol() {
       }
 
       case State::PRIVATE_INPUTS: {
-        vector <thread> t;
-        for (unsigned int i =0; i<players.size(); i++){
-          t.push_back(thread(&Client::send_private_inputs, this, i));
+        vector<future<void>> res;
+
+        for (unsigned int i = 0; i < players.size(); i++) {
+          res.push_back(async(launch::async, &Client::send_private_inputs, this, i));
         }
-        for (unsigned int i=0; i<players.size(); i++){
-          t.at(i).join();
+
+        for (auto& r : res) {
+          r.get(); // wait for all calls to finish
         }
-        
+
         protocol_state = State::DATASET_ACCEPTED;
         
         break;
