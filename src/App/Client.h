@@ -46,6 +46,7 @@ namespace sedp {
     State get_state();
     int get_id();
     void run_protocol(); 
+    void handshake(int player_id);
     int connect_to_player(string ip, int port);
     void connect_to_players(const vector <pair <string, int>>& p_addresses);
     void send_dataset_size();

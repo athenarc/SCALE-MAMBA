@@ -27,7 +27,9 @@ int sedp::Client::connect_to_player(string ip, int port) {
   return socket_id;
 	}
 
+void sedp::Client::handshake(int player_id){
   send_int_to(players.at(player_id), client_id);
+  cout << "Connected to player " << receive_int_from(players.at(player_id)) << endl;
 }
 
 void sedp::Client::connect_to_players(const vector <pair <string, int>>& player_addresses){
