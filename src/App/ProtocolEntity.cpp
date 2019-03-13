@@ -60,3 +60,8 @@ int sedp::ProtocolEntity::receive_int_from(int socket)
   receive_msg(socket, buff, 4);
   return BYTES_TO_INT(buff);
 }
+
+void sedp::ProtocolEntity::safe_print(const string& s) {
+  lock_guard<mutex> g{cmtx};
+  cout << s << endl;
+}

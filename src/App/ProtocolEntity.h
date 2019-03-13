@@ -3,11 +3,14 @@
 
 #include <cstdint>
 #include <sys/socket.h>
+#include <mutex>
 
 #include "Math/bigint.h" 
 
 namespace sedp {
   class ProtocolEntity {
+  private:
+    mutex cmtx;
   public:
     ProtocolEntity() {};
 
@@ -16,7 +19,8 @@ namespace sedp {
     void send_to(int socket, const string &o);
     void receive_from(int socket, string &o); 
     void send_int_to(int socket, unsigned int x);
-    int receive_int_from(int socket); 
+    int receive_int_from(int socket);
+    void safe_print(const string& s);
   };
 }
 
