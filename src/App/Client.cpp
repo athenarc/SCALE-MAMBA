@@ -22,28 +22,12 @@ sedp::Client::~Client() {
 
 int sedp::Client::connect_to_player(string ip, int port) {
   
-  int socket_id = socket(AF_INET , SOCK_STREAM , 0);
-
-  if (socket_id == -1)
-	{
-    throw Networking_error("Receiving error - 1");
-	}
-
-  struct sockaddr_in addr;
-  memset(&addr, 0, sizeof(addr));
-  addr.sin_family = AF_INET;
-  addr.sin_addr.s_addr = inet_addr(ip.c_str());
-  addr.sin_port = htons(port);
-
-  if (connect(socket_id , (struct sockaddr *)&addr , sizeof(addr))<0){
-    throw Networking_error("Connection with Player has failed...");
-  }
- 
-
-  send_int_to(socket_id, client_id);
-  cout << "Connected to player " << receive_int_from(socket_id) << endl;
+  int socket_id = OpenConnection(ip, port);
 
   return socket_id;
+	}
+
+  send_int_to(players.at(player_id), client_id);
 }
 
 void sedp::Client::connect_to_players(const vector <pair <string, int>>& player_addresses){
