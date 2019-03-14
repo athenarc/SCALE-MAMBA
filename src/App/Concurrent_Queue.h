@@ -41,7 +41,7 @@ template<typename T>
 void sedp::Concurrent_Queue<T>::get(T& val) {
   unique_lock<mutex> lck(mtx);
   cond.wait(lck, [this]{ return !q.empty(); });
-  val = q.front();
+  val = move(q.front());
   q.pop();
 }
 

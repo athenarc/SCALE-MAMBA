@@ -45,7 +45,9 @@ namespace sedp {
     thread accept_thread;
     thread handler_thread;
     mutex mtx;
-    Concurrent_Queue<shared_future<void>> pending_clients;
+    mutex mtx_data;
+    Concurrent_Queue<future<vector<int>>> pending_clients;
+    vector<int> total_data;
 
     void handle_clients ();
 

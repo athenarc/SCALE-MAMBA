@@ -2,7 +2,7 @@
 #include "ServerThread.h"
 
 sedp::Server::Server(unsigned int id, unsigned int port, unsigned int max_clients):
-  ProtocolEntity(), player_id{id}, port_number{port}, max_clients{max_clients}, current_num_of_clients{0}
+  ProtocolEntity(), player_id{id}, port_number{port}, max_clients{max_clients}, current_num_of_clients{0}, dataset_accepted{0}
 {
   cout << "Server (Player) " << player_id << ": Start listening at port " << port << endl;
   socket_id = OpenListener(port_number, max_clients);
@@ -21,7 +21,6 @@ sedp::Server::~Server() {
   }
 
   cout << "Closing server...." << endl;
-
   close(socket_id);
 }
 
@@ -64,22 +63,27 @@ void sedp::Server::accept_clients() {
   while(should_accept_clients()) {
     int client_sd = accept_single_client();
 
-    pending_clients.put(async(launch::async, [=](int client_sd, int player_id)
+    pending_clients.put(async(launch::async, [=](int client_sd, int player_id)->vector<int> // return vector<int>
       {
         ServerThread sthread(client_sd, player_id);
-        return sthread.run_protocol();
+        sthread.run_protocol();
+        return sthread.get_data();
       },
       client_sd, player_id
     ));
 
-    lock_guard<mutex> g{mtx};
     current_num_of_clients++;
   }
 }
 
 void sedp::Server::handle_clients() {
   while(!finished_import()) {
+    future<vector<int>> f;
     pending_clients.get(f);
-    f.get();
+    vector<int> tmp = f.get();
+
+    lock_guard<mutex> g{mtx_data};
+    total_data.insert(end(total_data), begin(tmp), end(tmp));
+    dataset_accepted++;
   }
 }

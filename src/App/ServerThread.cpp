@@ -82,9 +82,13 @@ void sedp::ServerThread::run_protocol() {
       }
 
       case State::DATASET_ACCEPTED:{
-        break;
+        break; // this case in never reached!
       }
 
     } // end switch
   } // end while-loop
 } // end run_protocol
+
+vector<int> sedp::ServerThread::get_data() {
+  return data;
+}

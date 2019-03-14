@@ -49,6 +49,7 @@ namespace sedp {
     void send_random_triples();
     void get_private_inputs();
     void get_dataset_size();
+    vector<int> get_data();
   };
 }
 
