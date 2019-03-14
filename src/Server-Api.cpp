@@ -7,14 +7,15 @@ using namespace sedp;
 
 int main(int argc, const char *argv[]) {
   int id;
-  int max_clients = 3;
+  int max_clients;
 
-  if (argc < 2) {
-    cout << "Usage: ./Server-Api.x <server_id>" << endl;
+  if (argc < 3) {
+    cout << "Usage: ./Server-Api.x <server_id> <total_clients>" << endl;
     exit(-1);
   }
 
   id = atoi(argv[1]);
+  max_clients = atoi(argv[2]);
 
   // use clock as seed
   srand(time(0) + id);
