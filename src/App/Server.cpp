@@ -52,9 +52,13 @@ int sedp::Server::accept_single_client() {
 
 bool sedp::Server::should_accept_clients() {
   lock_guard<mutex> g{mtx};
-  return current_num_of_clients < max_clients; 
+  return current_num_of_clients < max_clients;
 }
 
+bool sedp::Server::finished_import() {
+  lock_guard<mutex> g{mtx};
+  return dataset_accepted >= max_clients;
+}
 
 void sedp::Server::accept_clients() {
   while(should_accept_clients()) {
@@ -74,9 +78,8 @@ void sedp::Server::accept_clients() {
 }
 
 void sedp::Server::handle_clients() {
-  while(should_accept_clients()) {
-    shared_future<void> f;
+  while(!finished_import()) {
     pending_clients.get(f);
-    f.get(); 
+    f.get();
   }
 }

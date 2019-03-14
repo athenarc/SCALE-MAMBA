@@ -13,7 +13,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <fstream>
-#include <iterator> 
+#include <iterator>
 #include <map>
 #include <thread>
 #include <string>
@@ -41,6 +41,7 @@ namespace sedp {
     unsigned int port_number;
     unsigned int max_clients;
     unsigned int current_num_of_clients;
+    unsigned int dataset_accepted;
     thread accept_thread;
     thread handler_thread;
     mutex mtx;
@@ -59,6 +60,7 @@ namespace sedp {
     void accept_clients();
     int accept_single_client();
     bool should_accept_clients();
+    bool finished_import();
   };
 }
 
