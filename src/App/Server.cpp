@@ -50,10 +50,14 @@ int sedp::Server::accept_single_client() {
   return client_sd;
 }
 
+bool sedp::Server::should_accept_clients() {
+  lock_guard<mutex> g{mtx};
+  return current_num_of_clients < max_clients; 
+}
+
 
 void sedp::Server::accept_clients() {
-  while(current_num_of_clients <= max_clients) {
-
+  while(should_accept_clients()) {
     int client_sd = accept_single_client();
 
     pending_clients.put(async(launch::async, [=](int client_sd, int player_id)
@@ -70,7 +74,7 @@ void sedp::Server::accept_clients() {
 }
 
 void sedp::Server::handle_clients() {
-  while(current_num_of_clients <= max_clients) {
+  while(should_accept_clients()) {
     shared_future<void> f;
     pending_clients.get(f);
     f.get(); 

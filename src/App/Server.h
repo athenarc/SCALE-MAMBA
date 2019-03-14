@@ -58,6 +58,7 @@ namespace sedp {
     void init();
     void accept_clients();
     int accept_single_client();
+    bool should_accept_clients();
   };
 }
 
