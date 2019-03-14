@@ -14,6 +14,9 @@
 #include <string.h>
 #include <App/App.h>
 #include <fstream>
+#include <mutex>
+#include <thread>
+#include <future>
 
 #include "System/Networking.h"
 #include "Exceptions/Exceptions.h"
@@ -27,33 +30,48 @@ using namespace std;
 namespace sedp {
   class Client: public ProtocolEntity {
   private:
-    int socket_id;
     State protocol_state = State::INITIAL;
     unsigned int client_id;
     unsigned int max_players;
-    mutex Shares_mutex;
-    vector <vector <int>> Shares;
-    vector<int> players, Mask, my_data;
     int dataset_size;
-
+    mutex mtx;
+    vector <vector <int>> shares;
+    vector<int> players, data, masked_data;
+    
+    template <typename F>
+    void execute(F cb);
 
   public:
     ifstream inpf;
 
     Client(unsigned int id, unsigned int max_players);
-    
+
     ~Client();
     State get_state();
     int get_id();
-    void run_protocol(); 
+    void run_protocol();
+    void handshake(int player_id);
     int connect_to_player(string ip, int port);
     void connect_to_players(const vector <pair <string, int>>& p_addresses);
-    void send_dataset_size();
+    void send_dataset_size(int player_id);
     void compute_mask();
     void send_private_inputs(int player_id);
     void get_random_triples(int player_id);
+    void init();
   };
 }
 
+template <typename F>
+void sedp::Client::execute(F cb) {
+  vector<future<void>> res;
+
+  for (unsigned int i = 0; i < players.size(); i++) {
+    res.push_back(async(launch::async, cb, this, i));
+  }
+
+  for (auto& r : res) {
+    r.get(); // wait for all calls to finish
+  }
+}
 
 #endif

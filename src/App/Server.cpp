@@ -1,18 +1,36 @@
 #include "Server.h"
+#include "ServerThread.h"
 
 sedp::Server::Server(unsigned int id, unsigned int port, unsigned int max_clients):
-  ProtocolEntity(), player_id{id}, port_number{port}, max_clients{max_clients}, dataset_size{0}
+  ProtocolEntity(), player_id{id}, port_number{port}, max_clients{max_clients}, current_num_of_clients{0}
 {
   cout << "Server (Player) " << player_id << ": Start listening at port " << port << endl;
   socket_id = OpenListener(port_number, max_clients);
 }
 
 sedp::Server::~Server() {
+
+  if(accept_thread.joinable())
+  {
+    accept_thread.join();
+  }
+
+  if(handler_thread.joinable())
+  {
+    handler_thread.join();
+  }
+
   cout << "Closing server...." << endl;
+
   close(socket_id);
 }
 
-void sedp::Server::accept_clients() {
+void sedp::Server::init() {
+ accept_thread = std::thread(&sedp::Server::accept_clients, this);
+ handler_thread = std::thread(&sedp::Server::handle_clients, this);
+}
+
+int sedp::Server::accept_single_client() {
   struct sockaddr_in addr;
   memset(&addr, 0, sizeof(addr));
   socklen_t len = sizeof(addr);
@@ -29,105 +47,36 @@ void sedp::Server::accept_clients() {
 
   printf("Accepted Connection: %s:%d\n", inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
 
-  int client_id = receive_int_from(client_sd);
-
-  cout << "Client with id " << client_id << " connected." <<endl;
-
-  clients.insert(make_pair(client_id, client_sd));
-  send_int_to(client_sd, player_id);
+  return client_sd;
 }
 
-sedp::State sedp::Server::get_state(){
-  return protocol_state;
-}
-
-void sedp::Server::get_dataset_size() {
-  dataset_size = receive_int_from(clients.find(0)->second); 
-  // Choose random triplet shares and output into a Player_data file
-  outf.open("Player_" + to_string(player_id) +"_random_shares.txt");
-  if (!outf) {
-    throw file_error("Unable to open file...");
-  }
-  int counter = 0;
-  while (counter < dataset_size){
-    outf << rand() % 1000000 << endl;
-    counter++;
-  }
-  outf.close();
+bool sedp::Server::should_accept_clients() {
+  lock_guard<mutex> g{mtx};
+  return current_num_of_clients < max_clients; 
 }
 
 
-void sedp::Server::send_random_triples() {
+void sedp::Server::accept_clients() {
+  while(should_accept_clients()) {
+    int client_sd = accept_single_client();
 
-  cout << "Sending my Shares..." << endl;
+    pending_clients.put(async(launch::async, [=](int client_sd, int player_id)
+      {
+        ServerThread sthread(client_sd, player_id);
+        return sthread.run_protocol();
+      },
+      client_sd, player_id
+    ));
 
-  sleep(3);
-  int share, counter = dataset_size;
-  inpf.open("Player_" + to_string(player_id) +"_random_shares.txt");
-  if (!inpf){
-    cout << "Unable to open file." << endl;
-    exit(-1);
+    lock_guard<mutex> g{mtx};
+    current_num_of_clients++;
   }
-
-  while (counter > 0) {
-    inpf >> share;
-    Shares.push_back(share);
-    send_int_to(clients.find(0)->second, share); // Need to send actuall shares!
-    counter--;
-  }
-  inpf.close();
-  cout << " Succesfully sent my shares!"<<endl;
 }
 
-void sedp::Server::get_private_inputs() {
-
-  cout << "Importing data..." <<endl;
-  sleep(3);
-  int counter = 0;
-  outf.open("Player_out" + to_string(player_id) + ".txt");
-  if (!outf){
-    throw file_error("Unable to open out files...");
+void sedp::Server::handle_clients() {
+  while(should_accept_clients()) {
+    shared_future<void> f;
+    pending_clients.get(f);
+    f.get(); 
   }
-  while (counter < dataset_size){
-    int datum = receive_int_from(clients.find(0)->second);
-    int secret_share;
-    if (player_id == 0){
-      secret_share = datum + Shares.at(counter);
-    }
-    else {
-      secret_share = Shares.at(counter);
-    }
-    outf << secret_share << endl;
-    counter++;
-  }
-  outf.close();
 }
-
-void sedp::Server::run_protocol() {
-  while(protocol_state != State::DATASET_ACCEPTED){
-    switch(protocol_state) {
-      case State::INITIAL: {
-        get_dataset_size();
-        protocol_state = State::RANDOMNESS_SENT;
-        break;
-      }
-
-      case State::RANDOMNESS_SENT: {
-        send_random_triples();
-        protocol_state = State::PRIVATE_INPUTS;
-        break;
-      }
-
-      case State::PRIVATE_INPUTS: {
-        get_private_inputs();
-        protocol_state = State::DATASET_ACCEPTED;
-        break;
-      }
-
-      case State::DATASET_ACCEPTED:{
-        break;
-      }
-
-    } // end switch
-  } // end while-loop
-} // end run_protocol

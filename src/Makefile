@@ -28,7 +28,7 @@ APP = $(patsubst %.cpp,%.o,$(wildcard App/*.cpp))
 
 LIB = libMPC.a
 
-OBJ = Setup.o Player.o Server-Api.o
+OBJ = Setup.o Player.o 
 
 API_OBJ = Server-Api.o Client-Api.o
 API_SRC = Server-Api.cpp Client-Api.cpp
@@ -81,5 +81,5 @@ clean:
 	- cd App; rm *.o
 
 clean_api:
-	- rm Server-Api.x Server-Api.o Client-Api.x Client-Api.o
+	- cd .. ; rm Server-Api.x Server-Api.o Client-Api.x Client-Api.o
 	- cd App ; rm *.o

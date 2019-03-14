@@ -25,8 +25,9 @@ int main(int argc, const char *argv[]) {
     port++;
   }
 
+  c.init();
   c.connect_to_players(player_addresses);
-  
   c.run_protocol();
+
   return 0;
 }
