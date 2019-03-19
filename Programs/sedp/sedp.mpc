@@ -1,0 +1,13 @@
+open_channel(0)
+open_channel(1)
+
+n = regint.public_input(1)
+print_ln("Dataset size %s", n)
+
+# open_channel(2)
+# open_channel(3)
+
+close_channel(0)
+close_channel(1)
+# close_channel(2)
+# close_channel(3)
