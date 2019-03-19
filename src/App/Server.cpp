@@ -96,6 +96,17 @@ void sedp::Server::put_random_triple(const int& s) {
   }
 }
 
+void sedp::Server::send_random_triples(int client_sd, int start, int end) {
+  cout << "Thread:" << this_thread::get_id() << " Sending my Shares..." << endl;
+  this_thread::sleep_for(std::chrono::seconds(3));
+
+  for (int i = start; i < end; i++) {
+    send_int_to(client_sd, random_triples.at(i)); // Need to send actuall shares!
+  }
+
+  cout << " Succesfully sent my shares!" << endl;
+}
+
 void sedp::Server::accept_clients() {
   while(should_accept_clients()) {
     int client_sd = accept_single_client();
