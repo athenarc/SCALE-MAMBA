@@ -25,6 +25,7 @@ sedp::Server::~Server() {
 }
 
 void sedp::Server::init() {
+ protocol_state = State::HANDSHAKE;
  accept_thread = std::thread(&sedp::Server::accept_clients, this);
  handler_thread = std::thread(&sedp::Server::handle_clients, this);
 }
