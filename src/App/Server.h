@@ -70,6 +70,7 @@ namespace sedp {
     bool should_accept_clients();
     bool finished_import();
     void handshake(int client_sd);
+    int get_data_size();
   };
 }
 

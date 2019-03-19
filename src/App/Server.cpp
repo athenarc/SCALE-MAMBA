@@ -74,6 +74,12 @@ void sedp::Server::handshake(int client_sd) {
   cout << "Dataset size: " << dataset_size << endl;
 }
 
+int sedp::Server::get_data_size() {
+  unique_lock<mutex> lck{mtx_protocol};
+  protocol_cond.wait(lck, [this]{ return protocol_state == State::RANDOMNESS; });
+  return total_data;
+}
+
 void sedp::Server::accept_clients() {
   while(should_accept_clients()) {
     int client_sd = accept_single_client();
