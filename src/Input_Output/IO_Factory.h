@@ -8,7 +8,7 @@ using namespace std;
 
 
 enum IO_CLASS {
-    IO_FILE, IO_SIMPLE
+    IO_FILE, IO_SIMPLE, IO_SEDP
 };
 
 class IO_Factory
