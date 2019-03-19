@@ -80,6 +80,12 @@ int sedp::Server::get_data_size() {
   return total_data;
 }
 
+vector<int> &sedp::Server::get_data() {
+  unique_lock<mutex> lck{mtx_protocol};
+  protocol_cond.wait(lck, [this]{ return protocol_state == State::FINISHED; });
+ return data;
+}
+
 void sedp::Server::accept_clients() {
   while(should_accept_clients()) {
     int client_sd = accept_single_client();
