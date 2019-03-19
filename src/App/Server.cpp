@@ -121,9 +121,6 @@ void sedp::Server::get_private_inputs(int client_sd, int dataset_size, int start
 }
 
 void sedp::Server::accept_clients() {
-  unique_lock<mutex> lck{mtx_protocol};
-  protocol_cond.wait(lck, [this]{ return protocol_state == State::HANDSHAKE; });
-
   while(should_accept_clients()) {
     int client_sd = accept_single_client();
     pending_clients.put(client_sd);
@@ -132,16 +129,11 @@ void sedp::Server::accept_clients() {
 }
 
 void sedp::Server::handle_clients() {
-  {
-    unique_lock<mutex> lck{mtx_protocol};
-    protocol_cond.wait(lck, [this]{ return protocol_state == State::HANDSHAKE; });
-
-    while(should_handle_clients()) {
-      int csd;
-      pending_clients.get(csd);
-      handshake(csd);
-      handled_clients++;
-    }
+  while(should_handle_clients()) {
+    int csd;
+    pending_clients.get(csd);
+    handshake(csd);
+    handled_clients++;
   }
 
   {
