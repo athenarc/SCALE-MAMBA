@@ -59,6 +59,19 @@ bool sedp::Server::should_accept_clients() {
 bool sedp::Server::finished_import() {
   lock_guard<mutex> g{mtx};
   return dataset_accepted >= max_clients;
+void sedp::Server::handshake(int client_sd) {
+  send_int_to(client_sd, player_id);
+  int client_id = receive_int_from(client_sd);
+  int dataset_size = receive_int_from(client_sd);
+
+  vector<int> c{client_sd, dataset_size};
+
+  lock_guard<mutex> g{mtx};
+  clients.insert(pair<int, vector<int>>(client_id, c));
+  total_data += dataset_size;
+
+  cout << "Client with id " << client_id << " connected." <<endl;
+  cout << "Dataset size: " << dataset_size << endl;
 }
 
 void sedp::Server::accept_clients() {

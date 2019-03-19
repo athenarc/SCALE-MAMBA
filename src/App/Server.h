@@ -21,6 +21,7 @@
 #include <thread>
 #include <mutex>
 #include <future>
+#include <condition_variable>
 
 #include "System/Networking.h"
 #include "Exceptions/Exceptions.h"
@@ -47,8 +48,12 @@ namespace sedp {
     thread handler_thread;
     mutex mtx;
     mutex mtx_data;
-    Concurrent_Queue<future<vector<int>>> pending_clients;
-    vector<int> total_data;
+    mutex mtx_protocol;
+    Concurrent_Queue<int> pending_clients;
+    vector<int> data;
+    vector<int> random_triples;
+    map<int, vector<int>> clients;
+    condition_variable protocol_cond;
 
     void handle_clients ();
 
@@ -64,6 +69,7 @@ namespace sedp {
     int accept_single_client();
     bool should_accept_clients();
     bool finished_import();
+    void handshake(int client_sd);
   };
 }
 
