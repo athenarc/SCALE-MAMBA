@@ -1,13 +1,8 @@
 #include "Server.h"
-#include "ServerThread.h"
 
 sedp::Server::Server(unsigned int id, unsigned int port, unsigned int max_clients):
   ProtocolEntity(), player_id{id}, port_number{port}, max_clients{max_clients},
-  accepted_clients{0}, handled_clients{0}, total_data{0}
-{
-  cout << "Server (Player) " << player_id << ": Start listening at port " << port << endl;
-  socket_id = OpenListener(port_number, max_clients);
-}
+  accepted_clients{0}, handled_clients{0}, total_data{0} {}
 
 sedp::Server::~Server() {
 
@@ -26,6 +21,8 @@ sedp::Server::~Server() {
 }
 
 void sedp::Server::init() {
+ socket_id = OpenListener(port_number, max_clients);
+ cout << "Server (Player) " << player_id << ": Start listening at port " << port_number << endl;
  protocol_state = State::HANDSHAKE;
  accept_thread = std::thread(&sedp::Server::accept_clients, this);
  handler_thread = std::thread(&sedp::Server::handle_clients, this);
