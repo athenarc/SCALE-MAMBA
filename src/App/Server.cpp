@@ -56,9 +56,11 @@ bool sedp::Server::should_accept_clients() {
   return accepted_clients < max_clients;
 }
 
-bool sedp::Server::finished_import() {
+bool sedp::Server::should_handle_clients() {
   lock_guard<mutex> g{mtx};
-  return dataset_accepted >= max_clients;
+  return handled_clients < max_clients;
+}
+
 void sedp::Server::handshake(int client_sd) {
   send_int_to(client_sd, player_id);
   int client_id = receive_int_from(client_sd);
@@ -122,30 +124,77 @@ void sedp::Server::get_private_inputs(int client_sd, int dataset_size, int start
 }
 
 void sedp::Server::accept_clients() {
+  unique_lock<mutex> lck{mtx_protocol};
+  protocol_cond.wait(lck, [this]{ return protocol_state == State::HANDSHAKE; });
+
   while(should_accept_clients()) {
     int client_sd = accept_single_client();
-
-    pending_clients.put(async(launch::async, [=](int client_sd, int player_id)->vector<int> // return vector<int>
-      {
-        ServerThread sthread(client_sd, player_id);
-        sthread.run_protocol();
-        return sthread.get_data();
-      },
-      client_sd, player_id
-    ));
-
-    current_num_of_clients++;
+    pending_clients.put(client_sd);
+    accepted_clients++;
   }
 }
 
 void sedp::Server::handle_clients() {
-  while(!finished_import()) {
-    future<vector<int>> f;
-    pending_clients.get(f);
-    vector<int> tmp = f.get();
+  {
+    unique_lock<mutex> lck{mtx_protocol};
+    protocol_cond.wait(lck, [this]{ return protocol_state == State::HANDSHAKE; });
 
+    while(should_handle_clients()) {
+      int csd;
+      pending_clients.get(csd);
+      handshake(csd);
+      handled_clients++;
+    }
+  }
+
+  {
+    unique_lock<mutex> lck{mtx_protocol};
+    cout << "All clients handshaked" << endl;
+    protocol_state = State::RANDOMNESS;
+    protocol_cond.notify_all();
+  }
+
+  {
+    unique_lock<mutex> lck{mtx_protocol};
+    protocol_cond.wait(lck, [this]{ return protocol_state == State::DATA; });
+  }
+
+  vector<future<vector<int>>> responses;
+  map<int, vector<int>>::iterator itr;
+  int start = 0;
+  int end = 0;
+
+  for (itr = clients.begin(); itr != clients.end(); ++itr) {
+    int client_sd = itr->second[0];
+    int dataset_size = itr->second[1];
+
+    end += dataset_size;
+
+    responses.push_back(async(launch::async, [this](int client_sd, int dataset_size, int start, int end)->vector<int> // return vector<int>
+      {
+        vector<int> v;
+        v.reserve(dataset_size);
+        send_random_triples(client_sd, start, end);
+        get_private_inputs(client_sd, dataset_size, start, v);
+
+        return v;
+      },
+      client_sd, dataset_size, start, end
+    ));
+
+    start += dataset_size;
+  }
+
+  for (unsigned int i = 0; i != responses.size(); ++i) {
+    vector<int> tmp = responses.at(i).get();
     lock_guard<mutex> g{mtx_data};
-    total_data.insert(end(total_data), begin(tmp), end(tmp));
-    dataset_accepted++;
+    data.insert(std::end(data), std::begin(tmp), std::end(tmp));
+  }
+
+  {
+    unique_lock<mutex> lck{mtx_protocol};
+    cout << "Data retrieved!" << endl;
+    protocol_state = State::FINISHED;
+    protocol_cond.notify_all();
   }
 }

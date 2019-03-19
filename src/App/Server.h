@@ -68,7 +68,7 @@ namespace sedp {
     void accept_clients();
     int accept_single_client();
     bool should_accept_clients();
-    bool finished_import();
+    bool should_handle_clients();
     void handshake(int client_sd);
     int get_data_size();
     void put_random_triple(const int& s);
