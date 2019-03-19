@@ -58,8 +58,10 @@ int sedp::Client::connect_to_player(string ip, int port) {
 
 void sedp::Client::handshake(int player_id) {
   lock_guard<mutex> g{mtx};
+  receive_int_from(players.at(player_id)); // should we save the id that the player sent ?
+  cout << "Connected to player with id: " << player_id << endl;
   send_int_to(players.at(player_id), client_id);
-  receive_int_from(players.at(player_id));
+  send_int_to(players.at(player_id), dataset_size);
 }
 
 void sedp::Client::connect_to_players(const vector <pair <string, int>>& player_addresses) {
