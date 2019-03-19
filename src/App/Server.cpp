@@ -107,6 +107,20 @@ void sedp::Server::send_random_triples(int client_sd, int start, int end) {
   cout << " Succesfully sent my shares!" << endl;
 }
 
+void sedp::Server::get_private_inputs(int client_sd, int dataset_size, int start, vector<int>& vc) {
+  cout << "Thread:" << this_thread::get_id() << " Importing data..." << endl;
+  this_thread::sleep_for(std::chrono::seconds(3));
+
+  for (int i = 0; i < dataset_size; i++) {
+    int datum = receive_int_from(client_sd);
+    int secret_share;
+    
+    secret_share = datum + random_triples.at(start + i);
+
+    vc.push_back(secret_share);
+  }
+}
+
 void sedp::Server::accept_clients() {
   while(should_accept_clients()) {
     int client_sd = accept_single_client();

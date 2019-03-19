@@ -73,6 +73,7 @@ namespace sedp {
     int get_data_size();
     void put_random_triple(const int& s);
     void send_random_triples(int client_sd, int start, int end);
+    void get_private_inputs(int client_sd, int dataset_size, int start, vector<int>& vc);
     vector<int> &get_data();
   };
 }
