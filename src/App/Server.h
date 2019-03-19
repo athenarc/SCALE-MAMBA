@@ -40,8 +40,9 @@ namespace sedp {
     unsigned int player_id;
     unsigned int port_number;
     unsigned int max_clients;
-    unsigned int current_num_of_clients;
-    unsigned int dataset_accepted;
+    unsigned int accepted_clients;
+    unsigned int handled_clients;
+    unsigned int total_data;
     thread accept_thread;
     thread handler_thread;
     mutex mtx;

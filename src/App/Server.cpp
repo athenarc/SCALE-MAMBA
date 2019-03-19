@@ -2,7 +2,8 @@
 #include "ServerThread.h"
 
 sedp::Server::Server(unsigned int id, unsigned int port, unsigned int max_clients):
-  ProtocolEntity(), player_id{id}, port_number{port}, max_clients{max_clients}, current_num_of_clients{0}, dataset_accepted{0}
+  ProtocolEntity(), player_id{id}, port_number{port}, max_clients{max_clients},
+  accepted_clients{0}, handled_clients{0}, total_data{0}
 {
   cout << "Server (Player) " << player_id << ": Start listening at port " << port << endl;
   socket_id = OpenListener(port_number, max_clients);
@@ -52,7 +53,7 @@ int sedp::Server::accept_single_client() {
 
 bool sedp::Server::should_accept_clients() {
   lock_guard<mutex> g{mtx};
-  return current_num_of_clients < max_clients;
+  return accepted_clients < max_clients;
 }
 
 bool sedp::Server::finished_import() {
