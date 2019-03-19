@@ -1,6 +1,6 @@
 #include "IO_Factory.h"
 
-unique_ptr<IO_Stream> IO_Factory::make_io(unsigned int choice)
+unique_ptr<IO_Stream> IO_Factory::make_io(unsigned int choice, int player_id)
 {
 
   if (choice == IO_SIMPLE) {
