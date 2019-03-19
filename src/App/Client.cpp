@@ -123,36 +123,34 @@ void sedp::Client::get_random_triples(int player_id) {
 }
 
 void sedp::Client::run_protocol() {
-  while(protocol_state != State::DATASET_ACCEPTED) {
+  while(protocol_state != State::FINISHED) {
     switch(protocol_state) {
       case State::INITIAL: {
-        execute(&Client::handshake);
+        // here should init & connect to players. Client object should be initialized with player_addresses
         protocol_state= State::HANDSHAKE;
         break;
       }
 
       case State::HANDSHAKE: {
-        execute(&Client::send_dataset_size);
-        protocol_state = State::RANDOMNESS_SENT;
+        execute(&Client::handshake);
+        protocol_state= State::RANDOMNESS;
         break;
       }
 
-      case State::RANDOMNESS_SENT: {
+      case State::RANDOMNESS: {
+        protocol_state = State::DATA;
+        break;
+      }
+
+      case State::DATA: {
         execute(&Client::get_random_triples);
         compute_mask();
-        protocol_state = State::PRIVATE_INPUTS;
-
-        break;
-      }
-
-      case State::PRIVATE_INPUTS: {
         execute(&Client::send_private_inputs);
-        protocol_state = State::DATASET_ACCEPTED;
-        
+        protocol_state = State::FINISHED;
         break;
       }
 
-      case State::DATASET_ACCEPTED:{
+      case State::FINISHED:{
         break;
       }
       
