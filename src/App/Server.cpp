@@ -86,6 +86,16 @@ vector<int> &sedp::Server::get_data() {
  return data;
 }
 
+void sedp::Server::put_random_triple(const int& s) {
+  unique_lock<mutex> lck{mtx_protocol};
+  random_triples.push_back(s);
+
+  if (random_triples.size() == total_data) {
+    protocol_state = State::DATA;
+    protocol_cond.notify_all();
+  }
+}
+
 void sedp::Server::accept_clients() {
   while(should_accept_clients()) {
     int client_sd = accept_single_client();

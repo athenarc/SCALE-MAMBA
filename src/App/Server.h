@@ -71,6 +71,7 @@ namespace sedp {
     bool finished_import();
     void handshake(int client_sd);
     int get_data_size();
+    void put_random_triple(const int& s);
     vector<int> &get_data();
   };
 }
