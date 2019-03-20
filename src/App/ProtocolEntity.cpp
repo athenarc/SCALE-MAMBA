@@ -65,3 +65,29 @@ void sedp::ProtocolEntity::safe_print(const string& s) {
   lock_guard<mutex> g{cmtx};
   cout << s << endl;
 }
+
+void sedp::ProtocolEntity::pack(const vector<gfp>& v, string& s) {
+  ostringstream ss;
+  string del(1, delimiter);
+
+  for (auto &g: v){
+    ss << g;
+    ss << del;
+  }
+
+  s = ss.str();
+}
+
+void sedp::ProtocolEntity::unpack(const string& s, vector<gfp>& v){
+  string token;
+  istringstream tokenStream(s);
+
+  while (getline(tokenStream, token, delimiter))
+  {
+    gfp x;
+    stringstream ss;
+    ss << token;
+    ss >> x;
+    v.push_back(x);
+  }
+}
