@@ -118,7 +118,7 @@ void sedp::Server::get_private_inputs(int client_sd, int dataset_size, int start
     
     gfp y = str_to_gfp(s);
 
-    y = y + random_triples.at(i)[0]; // y[i] = received[i] - triples[i * 3]
+    y = y - random_triples.at(i)[0]; // y[i] = received[i] - triples[i * 3]
 
     vc.push_back(y);
   }
