@@ -23,6 +23,9 @@
 #include <future>
 #include <condition_variable>
 
+// No need to initialize gpf as it will be done by SCALE
+#include "Math/gfp.h"
+#include "Math/gf2n.h"
 #include "System/Networking.h"
 #include "Exceptions/Exceptions.h"
 #include "Tools/int.h"
@@ -50,8 +53,8 @@ namespace sedp {
     mutex mtx_data;
     mutex mtx_protocol;
     Concurrent_Queue<int> pending_clients;
-    vector<int> data;
-    vector<int> random_triples;
+    vector<gfp> data;
+    vector<vector<gfp>> random_triples;
     map<int, vector<int>> clients;
     condition_variable protocol_cond;
 
@@ -71,10 +74,10 @@ namespace sedp {
     bool should_handle_clients();
     void handshake(int client_sd);
     int get_data_size();
-    void put_random_triple(const int& s);
+    void put_random_triple(vector<gfp>& triple_share);
     void send_random_triples(int client_sd, int start, int end);
-    void get_private_inputs(int client_sd, int dataset_size, int start, vector<int>& vc);
-    vector<int> &get_data();
+    void get_private_inputs(int client_sd, int dataset_size, int start, vector<gfp>& vc);
+    vector<gfp> &get_data();
   };
 }
 

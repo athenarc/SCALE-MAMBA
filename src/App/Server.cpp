@@ -79,15 +79,15 @@ int sedp::Server::get_data_size() {
   return total_data;
 }
 
-vector<int> &sedp::Server::get_data() {
+vector<gfp> &sedp::Server::get_data() {
   unique_lock<mutex> lck{mtx_protocol};
   protocol_cond.wait(lck, [this]{ return protocol_state == State::FINISHED; });
  return data;
 }
 
-void sedp::Server::put_random_triple(const int& s) {
+void sedp::Server::put_random_triple(vector<gfp>& triple_share) {
   unique_lock<mutex> lck{mtx_protocol};
-  random_triples.push_back(s);
+  random_triples.push_back(triple_share);
 
   if (random_triples.size() == total_data) {
     protocol_state = State::DATA;
@@ -100,23 +100,27 @@ void sedp::Server::send_random_triples(int client_sd, int start, int end) {
   this_thread::sleep_for(std::chrono::seconds(3));
 
   for (int i = start; i < end; i++) {
-    send_int_to(client_sd, random_triples.at(i)); // Need to send actuall shares!
+    string s;
+    pack(random_triples.at(i), s);
+    send_to(client_sd, s);
   }
 
   cout << " Succesfully sent my shares!" << endl;
 }
 
-void sedp::Server::get_private_inputs(int client_sd, int dataset_size, int start, vector<int>& vc) {
+void sedp::Server::get_private_inputs(int client_sd, int dataset_size, int start, vector<gfp>& vc) {
   cout << "Thread:" << this_thread::get_id() << " Importing data..." << endl;
   this_thread::sleep_for(std::chrono::seconds(3));
 
   for (int i = 0; i < dataset_size; i++) {
-    int datum = receive_int_from(client_sd);
-    int secret_share;
+    string s;
+    receive_from(client_sd, s);
     
-    secret_share = datum + random_triples.at(start + i);
+    gfp y = str_to_gfp(s);
 
-    vc.push_back(secret_share);
+    y = y + random_triples.at(i)[0]; // y[i] = received[i] - triples[i * 3]
+
+    vc.push_back(y);
   }
 }
 
@@ -148,7 +152,7 @@ void sedp::Server::handle_clients() {
     protocol_cond.wait(lck, [this]{ return protocol_state == State::DATA; });
   }
 
-  vector<future<vector<int>>> responses;
+  vector<future<vector<gfp>>> responses;
   map<int, vector<int>>::iterator itr;
   int start = 0;
   int end = 0;
@@ -159,9 +163,9 @@ void sedp::Server::handle_clients() {
 
     end += dataset_size;
 
-    responses.push_back(async(launch::async, [this](int client_sd, int dataset_size, int start, int end)->vector<int> // return vector<int>
+    responses.push_back(async(launch::async, [this](int client_sd, int dataset_size, int start, int end)->vector<gfp> // return vector<int>
       {
-        vector<int> v;
+        vector<gfp> v;
         v.reserve(dataset_size);
         send_random_triples(client_sd, start, end);
         get_private_inputs(client_sd, dataset_size, start, v);
@@ -175,7 +179,7 @@ void sedp::Server::handle_clients() {
   }
 
   for (unsigned int i = 0; i != responses.size(); ++i) {
-    vector<int> tmp = responses.at(i).get();
+    vector<gfp> tmp = responses.at(i).get();
     lock_guard<mutex> g{mtx_data};
     data.insert(std::end(data), std::begin(tmp), std::end(tmp));
   }

@@ -77,11 +77,11 @@ int main(int argc, const char *argv[]) {
   triples_file.close();
 
   for (int i = 0; i < n; i++) {
-    s.put_random_triple(shares.at(i));
+    s.put_random_triple(triples.at(i));
   }
 
   // open_channel(3)
-  vector<int>& data = s.get_data();
+  vector<gfp>& data = s.get_data();
 
   for (auto &d : data) {
     // get_private_input(3);

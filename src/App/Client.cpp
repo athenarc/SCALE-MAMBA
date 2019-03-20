@@ -23,6 +23,8 @@ sedp::Client::~Client() {
 void sedp::Client::init() {
   int datum;
 
+  initialise_fields("Data/SharingData.txt");
+
   inpf.open("Client_data" + to_string(client_id) + ".txt");
 
   if (!inpf){
@@ -30,23 +32,35 @@ void sedp::Client::init() {
   }
 
   while (inpf >> datum) {
+    gfp x;
+    x.assign(datum);
     data.push_back(datum);
   }
 
   inpf.close();
+
   dataset_size = data.size();
   cout << "Dataset size: " << dataset_size << endl;
 
   // Initialize shares matrix
-  for (int i = 0; i < dataset_size; i++) {
-    vector<int> v;
+  triples.assign(dataset_size, vector<gfp>(3));
+}
 
-    for (unsigned int j = 0; j < max_players; j++) {
-      v.push_back(0);
-    }
+void sedp::Client::initialise_fields(const string& filename)
+{
+  bigint p;
 
-    shares.push_back(v);
-  }
+  cout << "loading params from: " << filename << endl;
+
+  ifstream inpf(filename.c_str());
+  if (inpf.fail()) { throw file_error(filename.c_str()); }
+
+  inpf >> p;
+
+  inpf.close();
+
+  gfp::init_field(p);
+  gf2n::init_field(128); // Assumes 128-bit prime generation
 }
 
 int sedp::Client::connect_to_player(string ip, int port) {
@@ -79,14 +93,9 @@ int sedp::Client::get_id(){
 }
 
 void sedp::Client::compute_mask() {
-  for (vector<vector <int>>::iterator it = shares.begin() ; it != shares.end(); ++it){
-    int mask = 0;
-
-    for (vector <int>::iterator it2 = (*it).begin() ; it2 != (*it).end(); ++it2){
-      mask = mask + *it2;
-    }
-
-    masked_data.push_back(mask);
+  for (int i = 0; i < dataset_size; i++)
+  {
+    data[i] + triples[i][0];
   }
 }
 
@@ -99,10 +108,11 @@ void sedp::Client::send_dataset_size(int player_id) {
 void sedp::Client::send_private_inputs(int player_id) {
   lock_guard<mutex> g{mtx};
   cout << "Sending private data..." << endl;
-  sleep(3);
+  this_thread::sleep_for(std::chrono::seconds(3));
 
   for (int i = 0; i < dataset_size; i++) {
-    send_int_to(players.at(player_id), data.at(i) - masked_data.at(i));
+    string s = gfp_to_str(data[i]);
+    send_to(players.at(player_id), s);
   }
 
   cout << "\nSuccesfully sent my data to player " + to_string(player_id) + "!" << endl;
@@ -112,11 +122,30 @@ void sedp::Client::send_private_inputs(int player_id) {
 void sedp::Client::get_random_triples(int player_id) {
   lock_guard<mutex> g{mtx};
   cout << "\nListening for shares of player " + to_string(player_id) + "..." << endl;
-  sleep(3);
+  this_thread::sleep_for(std::chrono::seconds(3));
 
   for (int i = 0; i < dataset_size; i++) {
-    int share = receive_int_from(players.at(player_id));
-    shares.at(i).at(player_id) = share;
+    string s;
+    receive_from(players.at(player_id), s);
+
+    vector<gfp> triple_shares;
+    unpack(s, triple_shares);
+    
+    for (int j = 0; j < 3; j++)
+    {
+      triples[i][j] += triple_shares[j];
+    }
+
+    for (int i = 0; i < dataset_size; i++)
+    {
+      if (triples[i][0] * triples[i][1] != triples[i][2])
+      {
+        cerr << "Incorrect triple at " << i << ", aborting\n";
+        cout << triples[i][0] * triples[i][1] << endl;
+        cout << triples[i][2] << endl;
+        // exit(1);
+      }
+    }
   }
 
   cout << "Succesfully received shares of player " + to_string(player_id) + "!" << endl;
