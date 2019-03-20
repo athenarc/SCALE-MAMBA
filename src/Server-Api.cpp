@@ -1,9 +1,20 @@
 #include <iostream>
+#include <sstream>
+
+#include "Math/gfp.h"
+#include "Math/gf2n.h"
+#include "Tools/int.h"
 #include "App/Protocol.h"
 #include "App/Server.h"
 
 using namespace std;
 using namespace sedp;
+
+void parseRandomVariable(string& line, gfp& x) {
+  stringstream ss(line);
+  gfp mac;
+  ss >> x >> mac;
+}
 
 int main(int argc, const char *argv[]) {
   int id;
@@ -20,6 +31,21 @@ int main(int argc, const char *argv[]) {
   // use clock as seed
   srand(time(0) + id);
 
+  bigint p;
+  string filename = "Data/SharingData.txt";
+
+  cout << "loading params from: " << filename << endl;
+
+  ifstream inpf(filename.c_str());
+  if (inpf.fail()) { throw file_error(filename.c_str()); }
+
+  inpf >> p;
+
+  inpf.close();
+
+  gfp::init_field(p);
+  gf2n::init_field(128); // Assumes 128-bit prime generation
+
   // open_channel(0)
   Server s(id, 14000 + id, max_clients);
   s.init();
@@ -29,13 +55,26 @@ int main(int argc, const char *argv[]) {
   int n = s.get_data_size();
   cout << "size: " << n << endl;
 
-
   // open_channel(2)
-  vector<int> shares;
+  vector<vector<gfp>> triples;
+  string line;
+  ifstream triples_file("Player_shares" + to_string(id) + ".txt");
 
-  for (int i = 0; i < n; i++) {
-    shares.push_back(rand() % 1000000);
+  while (getline(triples_file, line)) {
+    gfp a, b, c;
+    parseRandomVariable(line, a);
+
+    getline(triples_file, line);
+    parseRandomVariable(line, b);
+
+    getline(triples_file, line);
+    parseRandomVariable(line, c);
+
+    vector<gfp> triple_shares{a, b, c};
+    triples.push_back(triple_shares);
   }
+
+  triples_file.close();
 
   for (int i = 0; i < n; i++) {
     s.put_random_triple(shares.at(i));
