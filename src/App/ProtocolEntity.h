@@ -29,6 +29,8 @@ namespace sedp {
     void safe_print(const string& s);
     void pack(const vector<gfp>& v, string& s);
     void unpack(const string& s, vector<gfp>& v);
+    gfp str_to_gfp(const string& s);
+    string gfp_to_str(const gfp& y);
   };
 }
 

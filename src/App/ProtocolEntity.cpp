@@ -91,3 +91,17 @@ void sedp::ProtocolEntity::unpack(const string& s, vector<gfp>& v){
     v.push_back(x);
   }
 }
+
+gfp sedp::ProtocolEntity::str_to_gfp(const string& s) {
+  stringstream ss(s);
+  gfp y;
+  ss >> y;
+
+  return y;
+}
+
+string sedp::ProtocolEntity::gfp_to_str(const gfp& y) {
+  ostringstream ss;
+  ss << y;
+  return ss.str();
+}
