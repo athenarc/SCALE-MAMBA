@@ -85,11 +85,38 @@ vector<gfp> &sedp::Server::get_data() {
  return data;
 }
 
+
+void sedp::Server::add_random_sint_share(tuple<int, gfp, gfp>& r) {
+  random_integers.push_back(r);
+}
+
+
+void sedp::Server::construct_random_triples() {
+
+  vector<gfp> triple_share;
+
+  for (auto &r : random_integers) {
+      // int id = get<0>(r);
+      gfp x = get<1>(r);
+      // gfp mac = get<2>(r);
+      triple_share.push_back(x);
+
+      if (triple_share.size() == 3) {
+        random_triples.push_back(triple_share);
+        triple_share.clear();
+      }
+  }
+
+  unique_lock<mutex> lck{mtx_protocol};
+  protocol_state = State::DATA;
+  protocol_cond.notify_all();
+}
+
 void sedp::Server::put_random_triple(vector<gfp>& triple_share) {
   unique_lock<mutex> lck{mtx_protocol};
   random_triples.push_back(triple_share);
 
-  if (random_triples.size() == total_data) {
+  if (random_triples.size() >= total_data) {
     protocol_state = State::DATA;
     protocol_cond.notify_all();
   }

@@ -1,4 +1,5 @@
 #include <iostream>
+#include <tuple>
 #include <sstream>
 
 #include "Math/gfp.h"
@@ -12,8 +13,9 @@ using namespace sedp;
 
 void parseRandomVariable(string& line, gfp& x) {
   stringstream ss(line);
+  int id;
   gfp mac;
-  ss >> x >> mac;
+  ss >> id >> x >> mac;
 }
 
 int main(int argc, const char *argv[]) {
@@ -60,25 +62,26 @@ int main(int argc, const char *argv[]) {
   string line;
   ifstream triples_file("Player_shares" + to_string(id) + ".txt");
 
+  int counter = 0;
+
   while (getline(triples_file, line)) {
-    gfp a, b, c;
-    parseRandomVariable(line, a);
+    int id;
+    gfp r, mac;
 
-    getline(triples_file, line);
-    parseRandomVariable(line, b);
+    stringstream ss(line);
+    ss >> id >> r >> mac;
+    auto x = make_tuple(id, r, mac);
+    s.add_random_sint_share(x);
+    counter++;
 
-    getline(triples_file, line);
-    parseRandomVariable(line, c);
-
-    vector<gfp> triple_shares{a, b, c};
-    triples.push_back(triple_shares);
+    if (counter >= n * 3) {
+      break;
+    }
   }
 
   triples_file.close();
 
-  for (int i = 0; i < n; i++) {
-    s.put_random_triple(triples.at(i));
-  }
+  s.construct_random_triples();
 
   // open_channel(3)
   vector<gfp>& data = s.get_data();

@@ -15,6 +15,7 @@
 #include <fstream>
 #include <iterator>
 #include <map>
+#include <tuple>
 #include <thread>
 #include <string>
 #include <chrono>
@@ -55,6 +56,7 @@ namespace sedp {
     Concurrent_Queue<int> pending_clients;
     vector<gfp> data;
     vector<vector<gfp>> random_triples;
+    vector<tuple<int, gfp, gfp>> random_integers;
     map<int, vector<int>> clients;
     condition_variable protocol_cond;
 
@@ -78,6 +80,8 @@ namespace sedp {
     void send_random_triples(int client_sd, int start, int end);
     void get_private_inputs(int client_sd, int dataset_size, int start, vector<gfp>& vc);
     vector<gfp> &get_data();
+    void add_random_sint_share(tuple<int, gfp, gfp>& r);
+    void construct_random_triples();
   };
 }
 
