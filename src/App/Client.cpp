@@ -136,19 +136,22 @@ void sedp::Client::get_random_triples(int player_id) {
       triples[i][j] += triple_shares[j];
     }
 
-    for (int i = 0; i < dataset_size; i++)
-    {
-      if (triples[i][0] * triples[i][1] != triples[i][2])
-      {
-        cerr << "Incorrect triple at " << i << ", aborting\n";
-        cout << triples[i][0] * triples[i][1] << endl;
-        cout << triples[i][2] << endl;
-        // exit(1);
-      }
-    }
   }
 
   cout << "Succesfully received shares of player " + to_string(player_id) + "!" << endl;
+}
+
+void sedp::Client::verify_triples() {
+  for (int i = 0; i < dataset_size; i++)
+  {
+    if (triples[i][0] * triples[i][1] != triples[i][2])
+    {
+      cerr << "Incorrect triple at " << i << ", aborting\n";
+      cout << triples[i][0] * triples[i][1] << endl;
+      cout << triples[i][2] << endl;
+      // exit(1);
+    }
+  }
 }
 
 void sedp::Client::run_protocol() {
@@ -173,6 +176,7 @@ void sedp::Client::run_protocol() {
 
       case State::DATA: {
         execute(&Client::get_random_triples);
+        verify_triples();
         compute_mask();
         execute(&Client::send_private_inputs);
         protocol_state = State::FINISHED;

@@ -60,6 +60,7 @@ namespace sedp {
     void get_random_triples(int player_id);
     void init();
     void initialise_fields(const string& filename);
+    void verify_triples();
   };
 }
 
