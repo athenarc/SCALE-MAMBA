@@ -14,8 +14,9 @@ open_channel(2)
 
 do_loop(n, output_random_triples)
 
+open_channel(3) # construct triples
 
 close_channel(0)
 close_channel(1)
 close_channel(2)
-# close_channel(3)
+close_channel(3)

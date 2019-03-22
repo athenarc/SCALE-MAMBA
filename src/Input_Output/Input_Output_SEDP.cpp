@@ -22,6 +22,11 @@ long Input_Output_SEDP::open_channel(unsigned int channel)
     s.init();
   }
 
+  if (channel == 3) {
+    cout << "Constructing triples!" << endl;
+    s.construct_random_triples();
+  }
+
   return 0;
 }
 
