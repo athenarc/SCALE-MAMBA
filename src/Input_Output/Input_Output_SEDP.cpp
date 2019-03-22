@@ -86,6 +86,18 @@ void Input_Output_SEDP::public_output_int(const long output, unsigned int channe
 
 void Input_Output_SEDP::output_share(const Share &S, unsigned int channel)
 {
+  if (channel == 2) {
+    stringstream os;
+    int id;
+    gfp r, mac;
+    S.output(os, human);
+
+    os >> id >> r >> mac;
+    auto x = make_tuple(id, r, mac);
+    s.add_random_sint_share(x);
+    return;
+  }
+   
   S.output(*outf, human);
 }
 
