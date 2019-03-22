@@ -29,6 +29,7 @@ class Input_Output_SEDP : public IO_Stream
 private:
   int player_id;
   sedp::Server s;
+  vector<gfp> data;
 public:
   string inf_name;
   string onf_name;

@@ -27,6 +27,16 @@ long Input_Output_SEDP::open_channel(unsigned int channel)
     s.construct_random_triples();
   }
 
+  if (channel == 4) {
+    cout << "Getting data!" << endl;
+    s.construct_random_triples();
+    data = s.get_data();
+
+    for (auto &d : data) {
+      cout << d << endl;
+    }
+  }
+
   return 0;
 }
 
