@@ -22,6 +22,15 @@ do_loop(n, output_random_triples)
 open_channel(3) # construct triples
 open_channel(4) # get data
 
+def import_data(cond):
+  # naming as in Damgard et al
+  y = sint.public_input(1000)
+  print_ln("Data imported: %s", y)
+  return cond + 1 
+
+while_loop(import_data, lambda x: x<n, 0)
+
+
 close_channel(0)
 close_channel(1)
 close_channel(2)

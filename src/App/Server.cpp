@@ -148,12 +148,13 @@ void sedp::Server::get_private_inputs(int client_sd, int dataset_size, int start
     receive_from(client_sd, s);
     
     gfp y = str_to_gfp(s);
-    if (player_id == 0){
-      vc.push_back( y + random_triples.at(i)[0]); // y[i] = received[i] - triples[i * 3]
-      }
-    else{
-      vc.push_back(random_triples.at(i)[0]);
-      }
+    vc.push_back(y);
+    // if (player_id == 0){
+    //   vc.push_back( y + random_triples.at(i)[0]); // y[i] = received[i] - triples[i * 3]
+    //   }
+    // else{
+    //   vc.push_back(random_triples.at(i)[0]);
+    //   }
   }
 }
 

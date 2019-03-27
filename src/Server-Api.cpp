@@ -61,7 +61,7 @@ int main(int argc, const char *argv[]) {
   vector<vector<gfp>> triples;
   string line;
   ifstream triples_file("Player_shares" + to_string(id) + ".txt");
-
+  
   int counter = 0;
 
   while (getline(triples_file, line)) {

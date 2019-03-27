@@ -31,7 +31,7 @@ long Input_Output_SEDP::open_channel(unsigned int channel)
     cout << "Getting data!" << endl;
     // s.construct_random_triples();
     data = s.get_data();
-
+    
     for (auto &d : data) {
       cout << d << endl;
     }
@@ -61,15 +61,23 @@ void Input_Output_SEDP::private_output_gfp(const gfp &output, unsigned int chann
 }
 
 gfp Input_Output_SEDP::public_input_gfp(unsigned int channel)
-{
-  cout << "Enter value on channel " << channel << " : ";
+{ 
   gfp y;
-  y.assign(0);
-
-  // Important to have this call in each version of public_input_gfp
-  Update_Checker(y, channel);
-
+  if (channel >= 1000){
+    cout << "Importing masked data as public value " << channel << " : ";
+    y = data.at(0);
+    data.erase(data.begin());
+    Update_Checker(y, channel);
+    }
+  
+  else {
+    cout << "Enter value on channel " << channel << " : ";
+    y.assign(0);
+    // Important to have this call in each version of public_input_gfp
+    Update_Checker(y, channel);
+  }
   return y;
+  
 }
 
 void Input_Output_SEDP::public_output_gfp(const gfp &output, unsigned int channel)
