@@ -84,7 +84,7 @@ namespace sedp {
     void get_private_inputs(int client_sd, int dataset_size, int start, vector<gfp>& vc);
     vector<gfp> &get_data();
     void add_random_sint_share(tuple<int, gfp, gfp>& r);
-    void construct_random_triples();
+    void construct_random_tuples();
   };
 }
 

@@ -74,14 +74,14 @@ int main(int argc, const char *argv[]) {
     s.add_random_sint_share(x);
     counter++;
 
-    if (counter >= n * 3) {
+    if (counter >= n * 5) {
       break;
     }
   }
 
   triples_file.close();
 
-  s.construct_random_triples();
+  s.construct_random_tuples();
 
   // open_channel(3)
   vector<gfp>& data = s.get_data();

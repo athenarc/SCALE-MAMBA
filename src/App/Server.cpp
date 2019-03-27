@@ -47,7 +47,7 @@ int sedp::Server::accept_single_client() {
     throw Networking_error(err);
   }
 
-  printf("Accepted Connection: %s:%d\n", inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
+  printf("Accepted Connection: %s:%d", inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
 
   return client_sd;
 }
@@ -95,7 +95,7 @@ void sedp::Server::add_random_sint_share(tuple<int, gfp, gfp>& r) {
 }
 
 
-void sedp::Server::construct_random_triples() {
+void sedp::Server::construct_random_tuples() {
 
   vector<gfp> triple_share;
 
@@ -105,7 +105,7 @@ void sedp::Server::construct_random_triples() {
       // gfp mac = get<2>(r);
       triple_share.push_back(x);
 
-      if (triple_share.size() == 3) {
+      if (triple_share.size() == 5) {
         random_triples.push_back(triple_share);
         triple_share.clear();
       }

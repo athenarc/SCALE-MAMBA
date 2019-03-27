@@ -1,8 +1,13 @@
 def output_random_triples(cond):
-  a, b, c = sint.get_random_triple()
-  outp = [a, b, c]
+  # naming as in Damgard et al
+  y, r, w = sint.get_random_triple()
+  outp = [y, r, w]
   output_shares(2,*outp)
-  return cond - 1
+  v, un1, un2 = sint.get_random_triple()
+  u = v * r
+  outp2 = [v, u]
+  output_shares(2,*outp2)
+  return cond - 1 
 
 open_channel(0)
 open_channel(1)

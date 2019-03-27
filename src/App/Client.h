@@ -58,7 +58,7 @@ namespace sedp {
     void send_dataset_size(int player_id);
     void compute_mask();
     void send_private_inputs(int player_id);
-    void get_random_triples(int player_id);
+    void get_random_tuples(int player_id);
     void init();
     void initialise_fields(const string& filename);
     void verify_triples();

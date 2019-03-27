@@ -24,12 +24,12 @@ long Input_Output_SEDP::open_channel(unsigned int channel)
 
   if (channel == 3) {
     cout << "Constructing triples!" << endl;
-    s.construct_random_triples();
+    s.construct_random_tuples();
   }
 
   if (channel == 4) {
     cout << "Getting data!" << endl;
-    s.construct_random_triples();
+    // s.construct_random_triples();
     data = s.get_data();
 
     for (auto &d : data) {
@@ -106,13 +106,12 @@ void Input_Output_SEDP::output_share(const Share &S, unsigned int channel)
     int id;
     gfp r, mac;
     S.output(os, human);
-
     os >> id >> r >> mac;
     auto x = make_tuple(id, r, mac);
     s.add_random_sint_share(x);
     return;
   }
-   
+  cout << "WRONG Output Shares..." << endl;
   S.output(*outf, human);
 }
 
