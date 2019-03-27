@@ -56,7 +56,7 @@ void sedp::Client::initialise_fields(const string& filename)
   if (inpf.fail()) { throw file_error(filename.c_str()); }
 
   inpf >> p;
-
+  cout << "p = " << p << endl;
   inpf.close();
 
   gfp::init_field(p);
@@ -72,8 +72,8 @@ int sedp::Client::connect_to_player(string ip, int port) {
 
 void sedp::Client::handshake(int player_id) {
   lock_guard<mutex> g{mtx};
-  receive_int_from(players.at(player_id)); // should we save the id that the player sent ?
-  cout << "Connected to player with id: " << player_id << endl;
+  int p_id = receive_int_from(players.at(player_id)); // should we save the id that the player sent ?
+  std::cout << "Connected to player with id: " << player_id << endl;
   send_int_to(players.at(player_id), client_id);
   send_int_to(players.at(player_id), dataset_size);
 }
@@ -95,33 +95,33 @@ int sedp::Client::get_id(){
 void sedp::Client::compute_mask() {
   for (int i = 0; i < dataset_size; i++)
   {
-    data[i] + triples[i][0];
+    mask.push_back(data[i] - triples[i][0]);
   }
 }
 
 void sedp::Client::send_dataset_size(int player_id) {
   lock_guard<mutex> g{mtx};
   send_int_to(players.at(player_id), dataset_size);
-  cout << "Succesfully sent dataset size!" <<endl;
+  std::cout << "Succesfully sent dataset size!" <<endl;
 }
 
 void sedp::Client::send_private_inputs(int player_id) {
   lock_guard<mutex> g{mtx};
-  cout << "Sending private data..." << endl;
+  std::cout << "Sending private data..." << endl;
   this_thread::sleep_for(std::chrono::seconds(3));
 
   for (int i = 0; i < dataset_size; i++) {
-    string s = gfp_to_str(data[i]);
+    string s = gfp_to_str(mask[i]);
     send_to(players.at(player_id), s);
   }
 
-  cout << "\nSuccesfully sent my data to player " + to_string(player_id) + "!" << endl;
+  std::cout << "Succesfully sent my data to player " + to_string(player_id) + "!" << endl;
 
 }
 
 void sedp::Client::get_random_triples(int player_id) {
   lock_guard<mutex> g{mtx};
-  cout << "\nListening for shares of player " + to_string(player_id) + "..." << endl;
+  std::cout << "Listening for shares of player " + to_string(player_id) + "..." << endl;
   this_thread::sleep_for(std::chrono::seconds(3));
 
   for (int i = 0; i < dataset_size; i++) {
@@ -138,7 +138,7 @@ void sedp::Client::get_random_triples(int player_id) {
 
   }
 
-  cout << "Succesfully received shares of player " + to_string(player_id) + "!" << endl;
+  std::cout << "Succesfully received shares of player " + to_string(player_id) + "!" << endl;
 }
 
 void sedp::Client::verify_triples() {
@@ -147,8 +147,8 @@ void sedp::Client::verify_triples() {
     if (triples[i][0] * triples[i][1] != triples[i][2])
     {
       cerr << "Incorrect triple at " << i << ", aborting\n";
-      cout << triples[i][0] * triples[i][1] << endl;
-      cout << triples[i][2] << endl;
+      std::cout << triples[i][0] * triples[i][1] << endl;
+      std::cout << triples[i][2] << endl;
       // exit(1);
     }
   }
@@ -177,7 +177,9 @@ void sedp::Client::run_protocol() {
       case State::DATA: {
         execute(&Client::get_random_triples);
         verify_triples();
+        std::cout << "Computing Mask ..." << endl;
         compute_mask();
+        std::cout << "Mask Computed ..." << endl;
         execute(&Client::send_private_inputs);
         protocol_state = State::FINISHED;
         break;

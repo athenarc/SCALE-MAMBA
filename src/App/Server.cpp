@@ -28,6 +28,10 @@ void sedp::Server::init() {
  handler_thread = std::thread(&sedp::Server::handle_clients, this);
 }
 
+void sedp::Server::set_p(bigint p_val){
+  p = p_val;
+}
+
 int sedp::Server::accept_single_client() {
   struct sockaddr_in addr;
   memset(&addr, 0, sizeof(addr));
@@ -144,10 +148,12 @@ void sedp::Server::get_private_inputs(int client_sd, int dataset_size, int start
     receive_from(client_sd, s);
     
     gfp y = str_to_gfp(s);
-
-    y = y - random_triples.at(i)[0]; // y[i] = received[i] - triples[i * 3]
-
-    vc.push_back(y);
+    if (player_id == 0){
+      vc.push_back( y + random_triples.at(i)[0]); // y[i] = received[i] - triples[i * 3]
+      }
+    else{
+      vc.push_back(random_triples.at(i)[0]);
+      }
   }
 }
 

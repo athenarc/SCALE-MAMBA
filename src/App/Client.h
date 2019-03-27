@@ -37,7 +37,8 @@ namespace sedp {
     mutex mtx;
     vector<vector<gfp>> triples;
     vector<int> players;
-    vector<gfp> data; 
+    vector<gfp> data, mask;
+    vector <bigint> p; 
     
     template <typename F>
     void execute(F cb);

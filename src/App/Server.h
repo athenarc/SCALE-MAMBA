@@ -60,6 +60,8 @@ namespace sedp {
     map<int, vector<int>> clients;
     condition_variable protocol_cond;
 
+    bigint p;
+
     void handle_clients ();
 
   public:
@@ -70,6 +72,7 @@ namespace sedp {
 
     ~Server();
     void init();
+    void set_p(bigint p_val);
     void accept_clients();
     int accept_single_client();
     bool should_accept_clients();
