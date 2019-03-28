@@ -10,7 +10,7 @@ def output_random_triples(cond):
   #outp2 = [v, u]
   #output_shares(2,*outp2)
   mask[cond] = y
-  return cond + 1 
+  return cond + 1
 
 open_channel(0)
 open_channel(1)
@@ -32,7 +32,7 @@ def import_data(cond):
   y = cint.public_input(1000)
   y = sint(y)
   masked_data[cond] = y
-  return cond + 1 
+  return cond + 1
 
 while_loop(import_data, lambda x: x < n, 0)
 
