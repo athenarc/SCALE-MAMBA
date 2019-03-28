@@ -1,0 +1,53 @@
+mask = sint.Array(13) #add dynamic memory
+
+def output_random_triples(cond):
+  # naming as in Damgard et al
+  y, r, w = sint.get_random_triple()
+  v, un1, un2 = sint.get_random_triple()
+  u = v * r
+  outp = [y, r, w, v, u]
+  output_shares(2,*outp)
+  #outp2 = [v, u]
+  #output_shares(2,*outp2)
+  mask[cond] = y
+  return cond + 1
+
+open_channel(0)
+open_channel(1)
+
+n = regint.public_input(1)
+print_ln("Dataset size %s", n)
+
+open_channel(2)
+
+while_loop(output_random_triples, lambda x: x<n, 0)
+
+open_channel(3) # construct triples
+open_channel(4) # get data
+
+masked_data = sint.Array(13) #add dynamic memory
+
+def import_data(cond):
+  # naming as in Damgard et al
+  y = cint.public_input(1000)
+  y = sint(y)
+  masked_data[cond] = y
+  return cond + 1
+
+while_loop(import_data, lambda x: x < n, 0)
+
+data = sint.Array(13)
+
+@for_range(len(data))
+def range_body(i):
+  data[i] = masked_data[i] + mask[i]
+
+@for_range(len(data))
+def range_body(i):
+  print_ln("Retrieved data, %s", data[i].reveal())
+
+close_channel(0)
+close_channel(1)
+close_channel(2)
+close_channel(3)
+close_channel(4)

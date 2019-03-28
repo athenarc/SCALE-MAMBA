@@ -15,13 +15,18 @@
 #include <fstream>
 #include <iterator>
 #include <map>
+#include <tuple>
 #include <thread>
 #include <string>
 #include <chrono>
 #include <thread>
 #include <mutex>
 #include <future>
+#include <condition_variable>
 
+// No need to initialize gpf as it will be done by SCALE
+#include "Math/gfp.h"
+#include "Math/gf2n.h"
 #include "System/Networking.h"
 #include "Exceptions/Exceptions.h"
 #include "Tools/int.h"
@@ -40,14 +45,22 @@ namespace sedp {
     unsigned int player_id;
     unsigned int port_number;
     unsigned int max_clients;
-    unsigned int current_num_of_clients;
-    unsigned int dataset_accepted;
+    unsigned int accepted_clients;
+    unsigned int handled_clients;
+    unsigned int total_data;
     thread accept_thread;
     thread handler_thread;
     mutex mtx;
     mutex mtx_data;
-    Concurrent_Queue<future<vector<int>>> pending_clients;
-    vector<int> total_data;
+    mutex mtx_protocol;
+    Concurrent_Queue<int> pending_clients;
+    vector<gfp> data;
+    vector<vector<gfp>> random_triples;
+    vector<tuple<int, gfp, gfp>> random_integers;
+    map<int, vector<int>> clients;
+    condition_variable protocol_cond;
+
+    bigint p;
 
     void handle_clients ();
 
@@ -59,10 +72,19 @@ namespace sedp {
 
     ~Server();
     void init();
+    void set_p(bigint p_val);
     void accept_clients();
     int accept_single_client();
     bool should_accept_clients();
-    bool finished_import();
+    bool should_handle_clients();
+    void handshake(int client_sd);
+    int get_data_size();
+    void put_random_triple(vector<gfp>& triple_share);
+    void send_random_triples(int client_sd, int start, int end);
+    void get_private_inputs(int client_sd, int dataset_size, int start, vector<gfp>& vc);
+    vector<gfp> &get_data();
+    void add_random_sint_share(tuple<int, gfp, gfp>& r);
+    void construct_random_tuples();
   };
 }
 

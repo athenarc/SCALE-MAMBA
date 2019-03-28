@@ -8,7 +8,7 @@ using namespace std;
 
 
 enum IO_CLASS {
-    IO_FILE, IO_SIMPLE
+    IO_FILE, IO_SIMPLE, IO_SEDP
 };
 
 class IO_Factory
@@ -18,7 +18,7 @@ class IO_Factory
       ;
     }
     // Factory Method
-    static unique_ptr<IO_Stream> make_io(unsigned int choice);
+    static unique_ptr<IO_Stream> make_io(unsigned int choice, int player_id);
 };
 
 #endif

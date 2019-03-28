@@ -35,8 +35,10 @@ namespace sedp {
     unsigned int max_players;
     int dataset_size;
     mutex mtx;
-    vector <vector <int>> shares;
-    vector<int> players, data, masked_data;
+    vector<vector<gfp>> triples;
+    vector<int> players;
+    vector<gfp> data, mask;
+    vector <bigint> p; 
     
     template <typename F>
     void execute(F cb);
@@ -56,8 +58,10 @@ namespace sedp {
     void send_dataset_size(int player_id);
     void compute_mask();
     void send_private_inputs(int player_id);
-    void get_random_triples(int player_id);
+    void get_random_tuples(int player_id);
     void init();
+    void initialise_fields(const string& filename);
+    void verify_triples();
   };
 }
 

@@ -2,15 +2,21 @@
 #define _ProtocolEntity
 
 #include <cstdint>
+#include <string>
+#include <vector>
+#include <sstream>
 #include <sys/socket.h>
 #include <mutex>
 
 #include "Math/bigint.h" 
+#include "Math/gfp.h"
+#include "Math/gf2n.h"
 
 namespace sedp {
   class ProtocolEntity {
   private:
     mutex cmtx;
+    char delimiter = ','; // TODO: reconsider 
   public:
     ProtocolEntity() {};
 
@@ -21,6 +27,10 @@ namespace sedp {
     void send_int_to(int socket, unsigned int x);
     int receive_int_from(int socket);
     void safe_print(const string& s);
+    void pack(const vector<gfp>& v, string& s);
+    void unpack(const string& s, vector<gfp>& v);
+    gfp str_to_gfp(const string& s);
+    string gfp_to_str(const gfp& y);
   };
 }
 

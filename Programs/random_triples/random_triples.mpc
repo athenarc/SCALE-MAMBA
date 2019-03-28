@@ -1,8 +1,13 @@
 open_channel(0)
 
-a, b, c = sint.get_random_triple()
-
-outp = [a, b, c]
-output_shares(1000,*outp)
+for i in range(5):
+  # naming as in Damgard et al
+  y, r, w = sint.get_random_triple()
+  outp = [y, r, w]
+  output_shares(1000,*outp)
+  v = sint.get_random_int(128)
+  u = v * r
+  outp2 = [v, u]
+  output_shares(1000,*outp2)
 
 close_channel(0)
