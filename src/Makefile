@@ -81,5 +81,6 @@ clean:
 	- cd App; rm *.o
 
 clean_api:
-	- cd .. ; rm Server-Api.x Server-Api.o Client-Api.x Client-Api.o
+	- rm Server-Api.o Client-Api.o
 	- cd App ; rm *.o
+	- cd Input_Output ; rm *.o
