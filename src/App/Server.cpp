@@ -141,7 +141,7 @@ void sedp::Server::send_random_triples(int client_sd, int start, int end) {
 
 void sedp::Server::get_private_inputs(int client_sd, int dataset_size, int start, vector<gfp>& vc) {
   cout << "Thread:" << this_thread::get_id() << " Importing data..." << endl;
-  this_thread::sleep_for(std::chrono::seconds(3));
+  this_thread::sleep_for(std::chrono::seconds(1));
 
   for (int i = 0; i < dataset_size; i++) {
     string s;
@@ -149,12 +149,7 @@ void sedp::Server::get_private_inputs(int client_sd, int dataset_size, int start
     
     gfp y = str_to_gfp(s);
     vc.push_back(y);
-    // if (player_id == 0){
-    //   vc.push_back( y + random_triples.at(i)[0]); // y[i] = received[i] - triples[i * 3]
-    //   }
-    // else{
-    //   vc.push_back(random_triples.at(i)[0]);
-    //   }
+
   }
 }
 
