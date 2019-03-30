@@ -2,7 +2,7 @@ mylocal="$HOME/local"
 mkdir -p ${mylocal}
 cd ${mylocal}
 
-sudo apt-get install g++ yasm python cmake make m4 -y
+sudo apt-get install g++ yasm python cmake make m4 zip unzip -y
 
 # install MPIR
 curl -O 'http://mpir.org/mpir-3.0.0.tar.bz2'
