@@ -57,7 +57,7 @@ close_channel(4)
 # --------------------------------------------------------------------------------------
 
 cells = 3 # num categories
-histogram = sint.Array(cells)
+histogram = sint.Matrix(cells)
 one = sint(1)
 zero = sint(0)
 
@@ -67,6 +67,13 @@ def range_body(i):
   def range_body2(j):
     histogram[j] = histogram[j] + one * (data[i] == j)
 
+
+sum = sint(0)
+sum_addr = program.malloc(1, 's')
+sum.store_in_mem(sum_addr)
+
 @for_range(len(histogram))
 def range_body(i):
     print_ln("Histogram %s, %s", i, histogram[i].reveal())
+
+
