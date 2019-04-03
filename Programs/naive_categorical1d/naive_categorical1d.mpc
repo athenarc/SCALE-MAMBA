@@ -1,4 +1,6 @@
-mask = sint.Array(13) #add dynamic memory
+size_alloc = 500# {{data_size}}
+
+mask = sint.Array(size_alloc) #add dynamic memory
 
 def output_random_triples(cond):
   # naming as in Damgard et al
@@ -25,7 +27,7 @@ while_loop(output_random_triples, lambda x: x<n, 0)
 open_channel(3) # construct triples
 open_channel(4) # get data
 
-masked_data = sint.Array(13) #add dynamic memory
+masked_data = sint.Array(size_alloc) #add dynamic memory
 
 def import_data(cond):
   # naming as in Damgard et al
@@ -35,15 +37,15 @@ def import_data(cond):
 
 while_loop(import_data, lambda x: x < n, 0)
 
-data = sint.Array(13)
+data = sint.Array(size_alloc)
 
-@for_range(len(data))
+@for_range(n)
 def range_body(i):
   data[i] = masked_data[i] + mask[i]
 
-#@for_range(len(data))
-#def range_body(i):
-#  print_ln("Retrieved data, %s", data[i].reveal())
+@for_range(n)
+def range_body(i):
+  print_ln("Retrieved data, %s", data[i].reveal())
 
 close_channel(0)
 close_channel(1)
@@ -55,12 +57,12 @@ close_channel(4)
 # ======================================================================================
 # --------------------------------------------------------------------------------------
 
-cells = 3 # num categories
+cells = 2 # num categories
 histogram = sint.Array(cells)
 one = sint(1)
 zero = sint(0)
 
-@for_range(len(data))
+@for_range(n)
 def range_body(i):
   @for_range(cells)
   def range_body2(j):
