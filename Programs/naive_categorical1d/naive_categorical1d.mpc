@@ -1,4 +1,5 @@
 size_alloc = 500# {{data_size}}
+cells = 2 # {{num_categories}}
 
 mask = sint.Array(size_alloc) #add dynamic memory
 
@@ -43,9 +44,9 @@ data = sint.Array(size_alloc)
 def range_body(i):
   data[i] = masked_data[i] + mask[i]
 
-@for_range(n)
-def range_body(i):
-  print_ln("Retrieved data, %s", data[i].reveal())
+#@for_range(n)
+#def range_body(i):
+#  print_ln("Retrieved data, %s", data[i].reveal())
 
 close_channel(0)
 close_channel(1)
@@ -57,10 +58,9 @@ close_channel(4)
 # ======================================================================================
 # --------------------------------------------------------------------------------------
 
-cells = 2 # num categories
+
 histogram = sint.Array(cells)
 one = sint(1)
-zero = sint(0)
 
 @for_range(n)
 def range_body(i):
@@ -70,4 +70,5 @@ def range_body(i):
 
 @for_range(len(histogram))
 def range_body(i):
-    print_ln("Histogram %s, %s", i, histogram[i].reveal())
+  regint.public_output(i)
+  cint.public_output(histogram[i].reveal())
