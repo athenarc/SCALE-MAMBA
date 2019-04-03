@@ -30,7 +30,6 @@ masked_data = sint.Array(13) #add dynamic memory
 def import_data(cond):
   # naming as in Damgard et al
   y = cint.public_input(1000)
-  y = sint(y)
   masked_data[cond] = y
   return cond + 1
 
@@ -67,5 +66,5 @@ def range_body(i):
     updated_sum.store_in_mem(sum_addr)
 
 result = sint.load_mem(sum_addr)
-print_ln("Aggregation Result: %s", result.reveal())
+cint.public_output(result.reveal())
 
