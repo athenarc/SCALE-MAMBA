@@ -60,7 +60,6 @@ close_channel(4)
 # --------------------------------------------------------------------------------------
 
 histogram = sint.Matrix(cells_x,cells_y)
-one = sint(1)
 
 @for_range(n/2)
 def range_body(i):
@@ -68,7 +67,7 @@ def range_body(i):
   def range_body2(j):
     @for_range(cells_y)
     def range_body3(k):
-      histogram[j][k] = histogram[j][k] + one * (data[2*i] == j) * (data[2*i + 1] == k)
+      histogram[j][k] = histogram[j][k] + (data[2*i] == j) * (data[2*i + 1] == k)
 
 sum = sint(0)
 sum_addr = program.malloc(1, 's')

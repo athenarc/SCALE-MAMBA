@@ -60,13 +60,12 @@ close_channel(4)
 
 
 histogram = sint.Array(cells)
-one = sint(1)
 
 @for_range(n)
 def range_body(i):
   @for_range(cells)
   def range_body2(j):
-    histogram[j] = histogram[j] + one * (data[i] == j)
+    histogram[j] = histogram[j] + (data[i] == j)
 
 @for_range(len(histogram))
 def range_body(i):
