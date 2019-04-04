@@ -12,13 +12,13 @@ void sedp::ProtocolEntity::receive_msg(int socket, uint8_t *msg, int len) {
   while (len - i > 0)
     {
       j = recv(socket, msg + i, len - i, 0);
-      if (j < 0)
+      if (j <= 0)
         {
           throw receiving_error();
         }
       i = i + j;
     }
-  
+
   if (len - i != 0)
   {
     throw receiving_error();
@@ -55,7 +55,7 @@ void sedp::ProtocolEntity::send_int_to(int socket, unsigned int x)
 
 
 int sedp::ProtocolEntity::receive_int_from(int socket)
-{ 
+{
   uint8_t buff[4];
   receive_msg(socket, buff, 4);
   return BYTES_TO_INT(buff);
