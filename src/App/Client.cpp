@@ -7,7 +7,7 @@ sedp::Client::Client(unsigned int id, unsigned int max_players):
   client_id{id}, max_players{max_players}, dataset_size{0}
 {
   cout << "Client " << client_id << endl;
-  
+
 }
 
 sedp::Client::~Client() {
@@ -64,16 +64,16 @@ void sedp::Client::initialise_fields(const string& filename)
 }
 
 int sedp::Client::connect_to_player(string ip, int port) {
-  
+
   int socket_id = OpenConnection(ip, port);
- 
+
   return socket_id;
 }
 
 void sedp::Client::handshake(int player_id) {
   lock_guard<mutex> g{mtx};
   int p_id = receive_int_from(players.at(player_id)); // should we save the id that the player sent ?
-  std::cout << "Connected to player with id: " << player_id << endl;
+  cout << "Connected to player with id: " << player_id << endl;
   send_int_to(players.at(player_id), client_id);
   send_int_to(players.at(player_id), dataset_size);
 }
@@ -102,27 +102,27 @@ void sedp::Client::compute_mask() {
 void sedp::Client::send_dataset_size(int player_id) {
   lock_guard<mutex> g{mtx};
   send_int_to(players.at(player_id), dataset_size);
-  std::cout << "Succesfully sent dataset size!" <<endl;
+  cout << "Succesfully sent dataset size!" <<endl;
 }
 
 void sedp::Client::send_private_inputs(int player_id) {
   lock_guard<mutex> g{mtx};
-  std::cout << "Sending private data..." << endl;
   this_thread::sleep_for(std::chrono::seconds(3));
+  cout << "Sending private data..." << endl;
 
   for (int i = 0; i < dataset_size; i++) {
     string s = gfp_to_str(mask[i]);
     send_to(players.at(player_id), s);
   }
 
-  std::cout << "Succesfully sent my data to player " + to_string(player_id) + "!" << endl;
+  cout << "Succesfully sent my data to player " + to_string(player_id) + "!" << endl;
 
 }
 
 void sedp::Client::get_random_tuples(int player_id) {
   lock_guard<mutex> g{mtx};
-  std::cout << "Listening for shares of player " + to_string(player_id) + "..." << endl;
   this_thread::sleep_for(std::chrono::seconds(3));
+  cout << "Listening for shares of player " + to_string(player_id) + "..." << endl;
 
   for (int i = 0; i < dataset_size; i++) {
     string s;
@@ -130,7 +130,7 @@ void sedp::Client::get_random_tuples(int player_id) {
 
     vector<gfp> triple_shares;
     unpack(s, triple_shares);
-    
+
     for (int j = 0; j < 5; j++)
     {
       triples[i][j] += triple_shares[j];
@@ -138,25 +138,25 @@ void sedp::Client::get_random_tuples(int player_id) {
 
   }
 
-  std::cout << "Succesfully received shares of player " + to_string(player_id) + "!" << endl;
+  cout << "Succesfully received shares of player " + to_string(player_id) + "!" << endl;
 
 }
 
 void sedp::Client::verify_triples() {
   for (int i = 0; i < dataset_size; i++)
-  { 
+  {
     if (triples[i][0] * triples[i][1] != triples[i][2])
     {
       cerr << "Incorrect triple at " << i << ", aborting\n";
-      std::cout << triples[i][0] * triples[i][1] << endl;
-      std::cout << triples[i][2] << endl;
+      cout << triples[i][0] * triples[i][1] << endl;
+      cout << triples[i][2] << endl;
       // exit(1);
     }
     if (triples[i][1] * triples[i][3] != triples[i][4])
     {
       cerr << "Incorrect triple at " << i << ", aborting\n";
-      std::cout << triples[i][0] * triples[i][1] << endl;
-      std::cout << triples[i][2] << endl;
+      cout << triples[i][0] * triples[i][1] << endl;
+      cout << triples[i][2] << endl;
       // exit(1);
     }
     cout << "Verified Tuple!" << endl;
@@ -186,9 +186,9 @@ void sedp::Client::run_protocol() {
       case State::DATA: {
         execute(&Client::get_random_tuples);
         verify_triples();
-        std::cout << "Computing Mask ..." << endl;
+        cout << "Computing Mask ..." << endl;
         compute_mask();
-        std::cout << "Mask Computed ..." << endl;
+        cout << "Mask Computed ..." << endl;
         execute(&Client::send_private_inputs);
         protocol_state = State::FINISHED;
         break;
@@ -197,7 +197,7 @@ void sedp::Client::run_protocol() {
       case State::FINISHED:{
         break;
       }
-      
+
     } // end switch
   } // end while-loop
 } // end run_protocol
