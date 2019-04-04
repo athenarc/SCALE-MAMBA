@@ -39,6 +39,7 @@
 # SCALE
 CONFIG.mine
 *.x
+Programs/dynamic
 
 # MAMBA
 *.bc
