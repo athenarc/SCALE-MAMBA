@@ -128,7 +128,6 @@ void sedp::Server::put_random_triple(vector<gfp>& triple_share) {
 
 void sedp::Server::send_random_triples(int client_sd, int start, int end) {
   cout << "Thread:" << this_thread::get_id() << " Sending my Shares..." << endl;
-  this_thread::sleep_for(std::chrono::seconds(3));
 
   for (int i = start; i < end; i++) {
     string s;
@@ -141,12 +140,11 @@ void sedp::Server::send_random_triples(int client_sd, int start, int end) {
 
 void sedp::Server::get_private_inputs(int client_sd, int dataset_size, int start, vector<gfp>& vc) {
   cout << "Thread:" << this_thread::get_id() << " Importing data..." << endl;
-  this_thread::sleep_for(std::chrono::seconds(1));
 
   for (int i = 0; i < dataset_size; i++) {
     string s;
     receive_from(client_sd, s);
-    
+
     gfp y = str_to_gfp(s);
     vc.push_back(y);
 

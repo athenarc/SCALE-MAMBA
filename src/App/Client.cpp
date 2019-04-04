@@ -107,7 +107,6 @@ void sedp::Client::send_dataset_size(int player_id) {
 
 void sedp::Client::send_private_inputs(int player_id) {
   lock_guard<mutex> g{mtx};
-  this_thread::sleep_for(std::chrono::seconds(3));
   cout << "Sending private data..." << endl;
 
   for (int i = 0; i < dataset_size; i++) {
@@ -121,7 +120,6 @@ void sedp::Client::send_private_inputs(int player_id) {
 
 void sedp::Client::get_random_tuples(int player_id) {
   lock_guard<mutex> g{mtx};
-  this_thread::sleep_for(std::chrono::seconds(3));
   cout << "Listening for shares of player " + to_string(player_id) + "..." << endl;
 
   for (int i = 0; i < dataset_size; i++) {
