@@ -38,20 +38,13 @@ def import_data(cond):
 
 while_loop(import_data, lambda x: x < n, 0)
 
-intdata = sint.Array(size_alloc)
-
-@for_range(n)
-def range_body(i):
-  intdata[i] = masked_data[i] + mask[i]
-
 data = sfix.Array(size_alloc/2)
+
 @for_range(n/2)
 def range_body(i):
-  data[i] = sfix(intdata[2*i] + sfloat(intdata[2*i + 1]) * decimal_accuracy)
-
-#@for_range(n/2)
-#def range_body(i):
-#  print_ln("%s", (data[i]).reveal() ) 
+  intdata = masked_data[2*i] + mask[2*i]
+  floatdata = masked_data[2*i+1] + mask[2*i+1]
+  data[i] = sfix(intdata + sfloat(floatdata) * decimal_accuracy)
 
 close_channel(0)
 close_channel(1)
@@ -65,12 +58,20 @@ close_channel(4)
 
 maximum_element_address = program.malloc(1, sfix)
 store_in_mem(data[0], maximum_element_address)
+minimum_element_address = program.malloc(1, sfix)
+store_in_mem(data[0], minimum_element_address)
 
-
-@for_range(15)
+@for_range(n/2)
 def range_body(i):
   max = sfix.load_mem(maximum_element_address)
   max = max * (max >= data[i]) + data[i] * (max < data[i])
   store_in_mem(max, maximum_element_address)
-  
+
+@for_range(n/2)
+def range_body(i):
+  min = sfix.load_mem(minimum_element_address)
+  min = min * (min <= data[i]) + data[i] * (min > data[i])
+  store_in_mem(min, minimum_element_address)
+
 print_ln("%s", sfix.load_mem(maximum_element_address).reveal())
+print_ln("%s", sfix.load_mem(minimum_element_address).reveal())
