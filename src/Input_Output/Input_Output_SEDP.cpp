@@ -81,9 +81,11 @@ gfp Input_Output_SEDP::public_input_gfp(unsigned int channel)
 
 void Input_Output_SEDP::public_output_gfp(const gfp &output, unsigned int channel)
 {
-  cout << "Output channel " << channel << " : ";
-  output.output(cout, true);
-  cout << endl;
+  if (channel == 0){
+    cout << "Output channel " << channel << " : ";
+    output.output(cout, true);
+    cout << endl;
+  }
 }
 
 long Input_Output_SEDP::public_input_int(unsigned int channel)
@@ -103,7 +105,9 @@ long Input_Output_SEDP::public_input_int(unsigned int channel)
 
 void Input_Output_SEDP::public_output_int(const long output, unsigned int channel)
 {
-  cout << "Output channel " << channel << " : " << output << endl;
+  if (channel == 0){
+    cout << "Output channel " << channel << " : " << output << endl;
+  }
 }
 
 void Input_Output_SEDP::output_share(const Share &S, unsigned int channel)
