@@ -73,5 +73,24 @@ def range_body(i):
   min = min * (min <= data[i]) + data[i] * (min > data[i])
   store_in_mem(min, minimum_element_address)
 
-print_ln("%s", sfix.load_mem(maximum_element_address).reveal())
-print_ln("%s", sfix.load_mem(minimum_element_address).reveal())
+histogram = sint.Array(cells)
+
+cellWidthAddress = program.malloc(1, sfix)
+cellWidth = (sfix.load_mem(maximum_element_address) - sfix.load_mem(minimum_element_address)) / cells
+store_in_mem(cellWidth, cellWidthAddress)
+
+@for_range(n/2)
+def range_body(i):
+  cell = (data[i]-sfix.load_mem(minimum_element_address)) / sfix.load_mem(cellWidthAddress)
+  @for_range(cells)
+  def range_body2(j):
+    
+    add_value = (cell >= sfix(j)) * (cell <= sfix(j+1)) 
+    add_value = add_value + (cell > cells) * (j == cells-1)
+    histogram[j] = histogram[j] + add_value
+
+@for_range(cells)
+def range_body(i):
+  cint.public_output(histogram[i].reveal())
+
+print_ln("%s", cellWidth.reveal())
