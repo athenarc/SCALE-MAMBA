@@ -1,4 +1,8 @@
-mask = sint.Array(13) #add dynamic memory
+from Compiler import floatingpoint
+size_alloc = 100# {{size_alloc}}
+decimal_accuracy = 0.00001 #{{decimal_accuracy}}
+cells = 5 # {{cells}}
+mask = sint.Array(size_alloc) #add dynamic memory
 
 def output_random_triples(cond):
   # naming as in Damgard et al
@@ -7,8 +11,6 @@ def output_random_triples(cond):
   u = v * r
   outp = [y, r, w, v, u]
   output_shares(2,*outp)
-  #outp2 = [v, u]
-  #output_shares(2,*outp2)
   mask[cond] = y
   return cond + 1
 
@@ -20,30 +22,23 @@ print_ln("Dataset size %s", n)
 
 open_channel(2)
 
-while_loop(output_random_triples, lambda x: x<n, 0)
+while_loop(output_random_triples, lambda x: x<size_alloc, 0)
 
 open_channel(3) # construct triples
 open_channel(4) # get data
 
-masked_data = sint.Array(13) #add dynamic memory
+data = sfix.Array(size_alloc/2)
 
 def import_data(cond):
   # naming as in Damgard et al
   y = cint.public_input(1000)
-  masked_data[cond] = y
+  z = cint.public_input(1000)
+  intdata = y + mask[2*cond]
+  floatdata = z + mask[2*cond+1]
+  data[cond] = sfix(intdata + sfloat(floatdata) * decimal_accuracy)
   return cond + 1
 
-while_loop(import_data, lambda x: x < n, 0)
-
-data = sint.Array(13)
-
-@for_range(len(data))
-def range_body(i):
-  data[i] = masked_data[i] + mask[i]
-
-#@for_range(len(data))
-#def range_body(i):
-#  print_ln("Retrieved data, %s", data[i].reveal())
+while_loop(import_data, lambda x: x < n/2, 0) 
 
 close_channel(0)
 close_channel(1)
@@ -55,16 +50,19 @@ close_channel(4)
 # ======================================================================================
 # --------------------------------------------------------------------------------------
 
-sum = sint(0)
-sum_addr = program.malloc(1, 's')
+sum = sfix(0)
+sum_addr = program.malloc(1, sfix)
 sum.store_in_mem(sum_addr)
 
 @for_range(len(data))
 def range_body(i):
-    current_sum = sint.load_mem(sum_addr)
+    current_sum = sfix.load_mem(sum_addr)
     updated_sum = data[i] + current_sum
     updated_sum.store_in_mem(sum_addr)
 
-result = sint.load_mem(sum_addr)
-cint.public_output(result.reveal())
+result = sfix.load_mem(sum_addr)
+
+print_ln("OUTPUT START")
+print_ln("%s", result.reveal())
+print_ln("OUTPUT END")
 
