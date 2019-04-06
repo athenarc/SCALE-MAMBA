@@ -1,7 +1,7 @@
 size_alloc = 297# {{data_size}}
 cells = 2 # {{num_categories}}
 
-mask = sint.Array(size_alloc) #add dynamic memory
+data = sint.Array(size_alloc) #add dynamic memory
 
 def output_random_triples(cond):
   # naming as in Damgard et al
@@ -10,9 +10,7 @@ def output_random_triples(cond):
   u = v * r
   outp = [y, r, w, v, u]
   output_shares(2,*outp)
-  #outp2 = [v, u]
-  #output_shares(2,*outp2)
-  mask[cond] = y
+  data[cond] = y
   return cond + 1
 
 open_channel(0)
@@ -28,12 +26,10 @@ while_loop(output_random_triples, lambda x: x<n, 0)
 open_channel(3) # construct triples
 open_channel(4) # get data
 
-data = sint.Array(size_alloc)
-
 def import_data(cond):
   # naming as in Damgard et al
   y = cint.public_input(1000)
-  data[cond] = y + mask[cond]
+  data[cond] = y + data[cond]
   return cond + 1
 
 while_loop(import_data, lambda x: x < n, 0)
