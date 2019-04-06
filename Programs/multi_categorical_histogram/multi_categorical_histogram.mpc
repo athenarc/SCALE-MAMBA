@@ -1,6 +1,6 @@
-size_alloc = 500 # {{dataset_size}}
+size_alloc = 594 # {{size_alloc}}
 cells_x = 2#{{cells_x}}
-cells_y = 2#{{cells_y}}
+cells_y = 6#{{cells_y}}
 mask = sint.Array(size_alloc) #add dynamic memory
 
 def output_random_triples(cond):
@@ -33,7 +33,6 @@ masked_data = sint.Array(size_alloc) #add dynamic memory
 def import_data(cond):
   # naming as in Damgard et al
   y = cint.public_input(1000)
-  y = sint(y)
   masked_data[cond] = y
   return cond + 1
 
@@ -44,10 +43,6 @@ data = sint.Array(size_alloc)
 @for_range(n)
 def range_body(i):
   data[i] = masked_data[i] + mask[i]
-
-#@for_range(n)
-#def range_body(i):
-#  print_ln("Retrieved data, %s", data[i].reveal())
 
 close_channel(0)
 close_channel(1)
@@ -73,12 +68,11 @@ sum = sint(0)
 sum_addr = program.malloc(1, 's')
 sum.store_in_mem(sum_addr)
 
+print_ln("OUTPUT START:")   
 @for_range(cells_x)
 def range_body(i):
   @for_range(cells_y)
   def range_body2(j):
-    regint.public_output(i)
-    regint.public_output(j)
-    cint.public_output(histogram[i][j].reveal())
-
+    print_ln("%s, %s, %s", i, j, histogram[i][j].reveal())
+print_ln("OUTPUT END")
 
