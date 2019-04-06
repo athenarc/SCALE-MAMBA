@@ -1,5 +1,5 @@
 size_alloc = 297# {{data_size}}
-cells = 2 # {{num_categories}}
+cells = 6 # {{num_categories}}
 
 data = sint.Array(size_alloc) #add dynamic memory
 

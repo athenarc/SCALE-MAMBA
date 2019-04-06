@@ -11,8 +11,6 @@ def output_random_triples(cond):
   u = v * r
   outp = [y, r, w, v, u]
   output_shares(2,*outp)
-  #outp2 = [v, u]
-  #output_shares(2,*outp2)
   mask[cond] = y
   return cond + 1
 
@@ -24,7 +22,7 @@ print_ln("Dataset size %s", n)
 
 open_channel(2)
 
-while_loop(output_random_triples, lambda x: x<n, 0)
+while_loop(output_random_triples, lambda x: x<size_alloc, 0)
 
 open_channel(3) # construct triples
 open_channel(4) # get data

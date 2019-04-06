@@ -1,6 +1,6 @@
-size_alloc = 594 # {{size_alloc}}
-cells_x = 2#{{cells_x}}
-cells_y = 6#{{cells_y}}
+size_alloc =150 # {{dataset_size}}
+cells_x = 6#{{cells_x}}
+cells_y = 2#{{cells_y}}
 data = sint.Array(size_alloc) #add dynamic memory
 
 def output_random_triples(cond):
@@ -26,9 +26,10 @@ while_loop(output_random_triples, lambda x: x<n, 0)
 open_channel(3) # construct triples
 open_channel(4) # get data
 
-data = sint.Array(size_alloc)
+masked_data = sint.Array(size_alloc) #add dynamic memory
 
 def import_data(cond):
+  # naming as in Damgard et al
   y = cint.public_input(1000)
   data[cond] = y + data[cond]
   return cond + 1
@@ -59,11 +60,10 @@ sum = sint(0)
 sum_addr = program.malloc(1, 's')
 sum.store_in_mem(sum_addr)
 
-print_ln("OUTPUT START:")   
+print_ln("OUTPUT START:")
 @for_range(cells_x)
 def range_body(i):
   @for_range(cells_y)
   def range_body2(j):
     print_ln("%s, %s, %s", i, j, histogram[i][j].reveal())
 print_ln("OUTPUT END")
-
