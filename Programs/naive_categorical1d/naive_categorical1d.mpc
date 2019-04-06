@@ -1,4 +1,4 @@
-size_alloc = 500# {{data_size}}
+size_alloc = 297# {{data_size}}
 cells = 2 # {{num_categories}}
 
 mask = sint.Array(size_alloc) #add dynamic memory
@@ -67,7 +67,8 @@ def range_body(i):
   def range_body2(j):
     histogram[j] = histogram[j] + (data[i] == j)
 
+print_ln("OUTPUT START:")
 @for_range(len(histogram))
 def range_body(i):
-  regint.public_output(i)
-  cint.public_output(histogram[i].reveal())
+  print_ln("%s, %s", i, histogram[i].reveal())
+print_ln("OUTPUT END")
