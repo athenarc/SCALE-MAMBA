@@ -28,25 +28,15 @@ while_loop(output_random_triples, lambda x: x<n, 0)
 open_channel(3) # construct triples
 open_channel(4) # get data
 
-masked_data = sint.Array(size_alloc) #add dynamic memory
+data = sint.Array(size_alloc)
 
 def import_data(cond):
   # naming as in Damgard et al
   y = cint.public_input(1000)
-  masked_data[cond] = y
+  data[cond] = y + mask[cond]
   return cond + 1
 
 while_loop(import_data, lambda x: x < n, 0)
-
-data = sint.Array(size_alloc)
-
-@for_range(n)
-def range_body(i):
-  data[i] = masked_data[i] + mask[i]
-
-#@for_range(n)
-#def range_body(i):
-#  print_ln("Retrieved data, %s", data[i].reveal())
 
 close_channel(0)
 close_channel(1)
