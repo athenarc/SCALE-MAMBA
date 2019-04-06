@@ -1,7 +1,7 @@
 from Compiler import floatingpoint
-size_alloc = 1000# {{data_size}}
+size_alloc = 594# {{data_size}}
 decimal_accuracy = 0.00001 #{{decimal_accuracy}}
-cells = 3 # {{cells}}
+cells = 5 # {{cells}}
 mask = sint.Array(size_alloc) #add dynamic memory
 
 def output_random_triples(cond):
@@ -87,20 +87,13 @@ def range_body(i):
   cell = (data[i]-sfix.load_mem(minimum_element_address)) / sfix.load_mem(cellWidthAddress)
   @for_range(cells)
   def range_body2(j):
-    
     add_value = (cell >= sfix(j)) * (cell <= sfix(j+1)) 
     add_value = add_value + (cell > cells) * (j == cells-1)
     histogram[j] = histogram[j] + add_value
 
+print_ln("OUTPUT START:")
+print_ln("%s, %s", min.reveal(), max.reveal())
 @for_range(cells)
 def range_body(i):
-  cint.public_output(histogram[i].reveal())
-
-min_output = floatingpoint.FLRound(sfloat(min),0)
-max_output = floatingpoint.FLRound(sfloat(max + sfix(1)),0)
-
-
-cint.public_output(max_output[0].reveal())
-cint.public_output(max_output[1].reveal())
-cint.public_output(max_output[2].reveal())
-cint.public_output(max_output[3].reveal())
+  print_ln("%s, %s", i, histogram[i].reveal())
+print_ln("OUTPUT END")
