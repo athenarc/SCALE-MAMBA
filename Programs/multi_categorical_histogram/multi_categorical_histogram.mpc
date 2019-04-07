@@ -1,7 +1,7 @@
-size_alloc =150 # {{dataset_size}}
-cells_x = 6#{{cells_x}}
-cells_y = 2#{{cells_y}}
-data = sint.Array(size_alloc) #add dynamic memory
+size_alloc = 150  # {{sizeAllocation}}
+cells_x = 6  # {{cellsX}}
+cells_y = 2  # {{cellsY}}
+data = sint.Array(size_alloc)  # add dynamic memory
 
 def output_random_triples(cond):
   # naming as in Damgard et al

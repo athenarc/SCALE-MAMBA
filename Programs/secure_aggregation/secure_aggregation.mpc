@@ -1,8 +1,8 @@
 from Compiler import floatingpoint
-size_alloc = 100# {{size_alloc}}
-decimal_accuracy = 0.00001 #{{decimal_accuracy}}
-cells = 5 # {{cells}}
-mask = sint.Array(size_alloc) #add dynamic memory
+size_alloc = 100  # {{sizeAllocation}}
+decimal_accuracy = 0.00001  # {{precesion}}
+cells = 5  # {{cells}}
+mask = sint.Array(size_alloc)  # add dynamic memory
 
 def output_random_triples(cond):
   # naming as in Damgard et al

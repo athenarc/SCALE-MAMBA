@@ -1,9 +1,10 @@
+# noqa
 from Compiler import floatingpoint
-size_alloc = 69# {{size_alloc}}
-decimal_accuracy = 0.00001 #{{decimal_accuracy}}
-cells_x = 2 # {{cells_x}}
-cells_y = 3 # {{cells_y}}
-mask = sint.Array(size_alloc) #add dynamic memory
+size_alloc = 69  # {{sizeAllocation}}
+decimal_accuracy = 0.00001  # {{precesion}}
+cells_x = 2  # {{cellsX}}
+cells_y = 3  # {{cellsY}}
+mask = sint.Array(size_alloc)  # add dynamic memory
 
 def output_random_triples(cond):
   # naming as in Damgard et al

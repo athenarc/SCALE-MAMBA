@@ -1,7 +1,7 @@
-size_alloc = 297# {{data_size}}
-cells = 6 # {{num_categories}}
+size_alloc = 297  # {{sizeAllocation}}
+cells = 6  # {{cellsX}}
 
-data = sint.Array(size_alloc) #add dynamic memory
+data = sint.Array(size_alloc)  # add dynamic memory
 
 def output_random_triples(cond):
   # naming as in Damgard et al
