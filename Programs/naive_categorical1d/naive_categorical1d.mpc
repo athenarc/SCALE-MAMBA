@@ -21,7 +21,7 @@ print_ln("Dataset size %s", n)
 
 open_channel(2)
 
-while_loop(output_random_triples, lambda x: x<n, 0)
+while_loop(output_random_triples, lambda x: x < n, 0)
 
 open_channel(3) # construct triples
 open_channel(4) # get data
@@ -54,7 +54,9 @@ def range_body(i):
     histogram[j] = histogram[j] + (data[i] == j)
 
 print_ln("OUTPUT START:")
+
 @for_range(len(histogram))
 def range_body(i):
   print_ln("%s, %s", i, histogram[i].reveal())
+
 print_ln("OUTPUT END")

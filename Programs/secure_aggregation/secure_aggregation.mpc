@@ -1,4 +1,5 @@
 from Compiler import floatingpoint
+
 size_alloc = 100  # {{sizeAllocation}}
 decimal_accuracy = 0.00001  # {{precesion}}
 cells = 5  # {{cells}}
@@ -27,18 +28,18 @@ while_loop(output_random_triples, lambda x: x<size_alloc, 0)
 open_channel(3) # construct triples
 open_channel(4) # get data
 
-data = sfix.Array(size_alloc/2)
+data = sfix.Array(size_alloc / 2)
 
 def import_data(cond):
   # naming as in Damgard et al
   y = cint.public_input(1000)
   z = cint.public_input(1000)
-  intdata = y + mask[2*cond]
-  floatdata = z + mask[2*cond+1]
+  intdata = y + mask[2 * cond]
+  floatdata = z + mask[2 * cond + 1]
   data[cond] = sfix(intdata + sfloat(floatdata) * decimal_accuracy)
   return cond + 1
 
-while_loop(import_data, lambda x: x < n/2, 0)
+while_loop(import_data, lambda x: x < n / 2, 0)
 
 close_channel(0)
 close_channel(1)

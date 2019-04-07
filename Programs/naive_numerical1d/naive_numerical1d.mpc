@@ -1,4 +1,5 @@
 from Compiler import floatingpoint
+
 size_alloc = 100  # {{sizeAllocation}}
 decimal_accuracy = 0.00001  # {{precesion}}
 cells = 5  # {{cellsX}}
@@ -22,23 +23,23 @@ print_ln("Dataset size %s", n)
 
 open_channel(2)
 
-while_loop(output_random_triples, lambda x: x<size_alloc, 0)
+while_loop(output_random_triples, lambda x: x < size_alloc, 0)
 
 open_channel(3) # construct triples
 open_channel(4) # get data
 
-data = sfix.Array(size_alloc/2)
+data = sfix.Array(size_alloc / 2)
 
 def import_data(cond):
   # naming as in Damgard et al
   y = cint.public_input(1000)
   z = cint.public_input(1000)
-  intdata = y + mask[2*cond]
-  floatdata = z + mask[2*cond+1]
+  intdata = y + mask[2 * cond]
+  floatdata = z + mask[2 * cond+1]
   data[cond] = sfix(intdata + sfloat(floatdata) * decimal_accuracy)
   return cond + 1
 
-while_loop(import_data, lambda x: x < n/2, 0)
+while_loop(import_data, lambda x: x < n / 2, 0)
 
 close_channel(0)
 close_channel(1)
@@ -74,16 +75,18 @@ store_in_mem(cellWidth, cellWidthAddress)
 
 @for_range(n/2)
 def range_body(i):
-  cell = (data[i]-sfix.load_mem(minimum_element_address)) / sfix.load_mem(cellWidthAddress)
+  cell = (data[i] - sfix.load_mem(minimum_element_address)) / sfix.load_mem(cellWidthAddress)
   @for_range(cells)
   def range_body2(j):
-    add_value = (cell >= sfix(j)) * (cell <= sfix(j+1))
-    add_value = add_value + (cell > cells) * (j == cells-1)
+    add_value = (cell >= sfix(j)) * (cell <= sfix(j + 1))
+    add_value = add_value + (cell > cells) * (j == cells - 1)
     histogram[j] = histogram[j] + add_value
 
 print_ln("OUTPUT START:")
 print_ln("%s, %s", min.reveal(), max.reveal())
+
 @for_range(cells)
 def range_body(i):
   print_ln("%s, %s", i, histogram[i].reveal())
+
 print_ln("OUTPUT END")

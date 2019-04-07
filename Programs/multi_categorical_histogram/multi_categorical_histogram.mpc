@@ -21,7 +21,7 @@ print_ln("Dataset size %s", n)
 
 open_channel(2)
 
-while_loop(output_random_triples, lambda x: x<n, 0)
+while_loop(output_random_triples, lambda x: x < n, 0)
 
 open_channel(3) # construct triples
 open_channel(4) # get data
@@ -48,22 +48,24 @@ close_channel(4)
 
 histogram = sint.Matrix(cells_x,cells_y)
 
-@for_range(n/2)
+@for_range(n / 2)
 def range_body(i):
   @for_range(cells_x)
   def range_body2(j):
     @for_range(cells_y)
     def range_body3(k):
-      histogram[j][k] = histogram[j][k] + (data[2*i] == j) * (data[2*i + 1] == k)
+      histogram[j][k] = histogram[j][k] + (data[2 * i] == j) * (data[2 * i + 1] == k)
 
 sum = sint(0)
 sum_addr = program.malloc(1, 's')
 sum.store_in_mem(sum_addr)
 
 print_ln("OUTPUT START:")
+
 @for_range(cells_x)
 def range_body(i):
   @for_range(cells_y)
   def range_body2(j):
     print_ln("%s, %s, %s", i, j, histogram[i][j].reveal())
+
 print_ln("OUTPUT END")
