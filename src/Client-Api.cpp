@@ -7,18 +7,19 @@ using namespace sedp;
 int main(int argc, const char *argv[]) {
 
   int id, n_players;
-  string rootCertName;
+  string dataset, rootCertName;
   vector <pair<string, int>> player_addresses;
   string networkDataFile = "Data/NetworkData.txt";
 
-  if (argc < 2) {
-    cout << "Usage: ./Client-Api.x <client_id>" << endl;
+  if (argc < 3) {
+    cout << "Usage: ./Client-Api.x <client_id> <dataset>" << endl;
     exit(-1);
   }
 
   id = atoi(argv[1]);
+  dataset = argv[2];
 
-  Client c(id, n_players);
+  Client c(id, n_players, dataset);
   int port = 14000;
   vector <string> ipNumbers;
 
@@ -34,7 +35,7 @@ int main(int argc, const char *argv[]) {
   ipNumbers.resize(n_players);
 
   for (int i= 0; i < n_players; i++)
-  { 
+  {
     string cert, name;
     int j;
     inp >> j >> ipNumbers[i] >> cert >> name;
