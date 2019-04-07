@@ -38,7 +38,7 @@ def import_data(cond):
   data[cond] = sfix(intdata + sfloat(floatdata) * decimal_accuracy)
   return cond + 1
 
-while_loop(import_data, lambda x: x < n/2, 0) 
+while_loop(import_data, lambda x: x < n/2, 0)
 
 close_channel(0)
 close_channel(1)
@@ -77,7 +77,7 @@ def range_body(i):
   cell = (data[i]-sfix.load_mem(minimum_element_address)) / sfix.load_mem(cellWidthAddress)
   @for_range(cells)
   def range_body2(j):
-    add_value = (cell >= sfix(j)) * (cell <= sfix(j+1)) 
+    add_value = (cell >= sfix(j)) * (cell <= sfix(j+1))
     add_value = add_value + (cell > cells) * (j == cells-1)
     histogram[j] = histogram[j] + add_value
 

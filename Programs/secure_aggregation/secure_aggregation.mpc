@@ -38,7 +38,7 @@ def import_data(cond):
   data[cond] = sfix(intdata + sfloat(floatdata) * decimal_accuracy)
   return cond + 1
 
-while_loop(import_data, lambda x: x < n/2, 0) 
+while_loop(import_data, lambda x: x < n/2, 0)
 
 close_channel(0)
 close_channel(1)
@@ -65,4 +65,3 @@ result = sfix.load_mem(sum_addr)
 print_ln("OUTPUT START")
 print_ln("%s", result.reveal())
 print_ln("OUTPUT END")
-
