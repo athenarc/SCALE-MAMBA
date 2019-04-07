@@ -30,7 +30,6 @@ masked_data = sint.Array(13) #add dynamic memory
 def import_data(cond):
   # naming as in Damgard et al
   y = cint.public_input(1000)
-  y = sint(y)
   masked_data[cond] = y
   return cond + 1
 

@@ -1,0 +1,68 @@
+from Compiler import floatingpoint
+
+size_alloc = 100  # {{sizeAllocation}}
+decimal_accuracy = 0.00001  # {{precesion}}
+cells = 5  # {{cells}}
+mask = sint.Array(size_alloc)  # add dynamic memory
+
+def output_random_triples(cond):
+  # naming as in Damgard et al
+  y, r, w = sint.get_random_triple()
+  v, un1, un2 = sint.get_random_triple()
+  u = v * r
+  outp = [y, r, w, v, u]
+  output_shares(2,*outp)
+  mask[cond] = y
+  return cond + 1
+
+open_channel(0)
+open_channel(1)
+
+n = regint.public_input(1)
+print_ln("Dataset size %s", n)
+
+open_channel(2)
+
+while_loop(output_random_triples, lambda x: x<size_alloc, 0)
+
+open_channel(3) # construct triples
+open_channel(4) # get data
+
+data = sfix.Array(size_alloc / 2)
+
+def import_data(cond):
+  # naming as in Damgard et al
+  y = cint.public_input(1000)
+  z = cint.public_input(1000)
+  intdata = y + mask[2 * cond]
+  floatdata = z + mask[2 * cond + 1]
+  data[cond] = sfix(intdata + sfloat(floatdata) * decimal_accuracy)
+  return cond + 1
+
+while_loop(import_data, lambda x: x < n / 2, 0)
+
+close_channel(0)
+close_channel(1)
+close_channel(2)
+close_channel(3)
+close_channel(4)
+
+# --------------------------------------------------------------------------------------
+# ======================================================================================
+# --------------------------------------------------------------------------------------
+
+sum = sfix(0)
+sum_addr = program.malloc(1, sfix)
+sum.store_in_mem(sum_addr)
+
+@for_range(len(data))
+def range_body(i):
+    current_sum = sfix.load_mem(sum_addr)
+    updated_sum = data[i] + current_sum
+    updated_sum.store_in_mem(sum_addr)
+
+result = sfix.load_mem(sum_addr)
+
+print_ln("OUTPUT START")
+print_ln("%s", result.reveal())
+print_ln("OUTPUT END")

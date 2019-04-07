@@ -33,20 +33,21 @@ namespace sedp {
     State protocol_state = State::INITIAL;
     unsigned int client_id;
     unsigned int max_players;
+    string dataset_file_path;
     int dataset_size;
     mutex mtx;
     vector<vector<gfp>> triples;
     vector<int> players;
     vector<gfp> data, mask;
-    vector <bigint> p; 
-    
+    vector <bigint> p;
+
     template <typename F>
     void execute(F cb);
 
   public:
     ifstream inpf;
 
-    Client(unsigned int id, unsigned int max_players);
+    Client(unsigned int id, unsigned int max_players, string dataset);
 
     ~Client();
     State get_state();

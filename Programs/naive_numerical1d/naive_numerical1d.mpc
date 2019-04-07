@@ -1,0 +1,92 @@
+from Compiler import floatingpoint
+
+size_alloc = 100  # {{sizeAllocation}}
+decimal_accuracy = 0.00001  # {{precesion}}
+cells = 5  # {{cellsX}}
+mask = sint.Array(size_alloc)  # add dynamic memory
+
+def output_random_triples(cond):
+  # naming as in Damgard et al
+  y, r, w = sint.get_random_triple()
+  v, un1, un2 = sint.get_random_triple()
+  u = v * r
+  outp = [y, r, w, v, u]
+  output_shares(2,*outp)
+  mask[cond] = y
+  return cond + 1
+
+open_channel(0)
+open_channel(1)
+
+n = regint.public_input(1)
+print_ln("Dataset size %s", n)
+
+open_channel(2)
+
+while_loop(output_random_triples, lambda x: x < size_alloc, 0)
+
+open_channel(3) # construct triples
+open_channel(4) # get data
+
+data = sfix.Array(size_alloc / 2)
+
+def import_data(cond):
+  # naming as in Damgard et al
+  y = cint.public_input(1000)
+  z = cint.public_input(1000)
+  intdata = y + mask[2 * cond]
+  floatdata = z + mask[2 * cond+1]
+  data[cond] = sfix(intdata + sfloat(floatdata) * decimal_accuracy)
+  return cond + 1
+
+while_loop(import_data, lambda x: x < n / 2, 0)
+
+close_channel(0)
+close_channel(1)
+close_channel(2)
+close_channel(3)
+close_channel(4)
+
+# --------------------------------------------------------------------------------------
+# ======================================================================================
+# --------------------------------------------------------------------------------------
+
+maximum_element_address = program.malloc(1, sfix)
+store_in_mem(data[0], maximum_element_address)
+minimum_element_address = program.malloc(1, sfix)
+store_in_mem(data[0], minimum_element_address)
+
+@for_range(n/2)
+def range_body(i):
+  min = sfix.load_mem(minimum_element_address)
+  max = sfix.load_mem(maximum_element_address)
+  min = min * (min <= data[i]) + data[i] * (min > data[i])
+  max = max * (max >= data[i]) + data[i] * (max < data[i])
+  store_in_mem(max, maximum_element_address)
+  store_in_mem(min, minimum_element_address)
+
+histogram = sint.Array(cells)
+
+cellWidthAddress = program.malloc(1, sfix)
+max = sfix.load_mem(maximum_element_address)
+min = sfix.load_mem(minimum_element_address)
+cellWidth = (max - min) / cells
+store_in_mem(cellWidth, cellWidthAddress)
+
+@for_range(n/2)
+def range_body(i):
+  cell = (data[i] - sfix.load_mem(minimum_element_address)) / sfix.load_mem(cellWidthAddress)
+  @for_range(cells)
+  def range_body2(j):
+    add_value = (cell >= sfix(j)) * (cell <= sfix(j + 1))
+    add_value = add_value + (cell > cells) * (j == cells - 1)
+    histogram[j] = histogram[j] + add_value
+
+print_ln("OUTPUT START:")
+print_ln("%s, %s", min.reveal(), max.reveal())
+
+@for_range(cells)
+def range_body(i):
+  print_ln("%s, %s", i, histogram[i].reveal())
+
+print_ln("OUTPUT END")

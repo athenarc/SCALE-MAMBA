@@ -3,8 +3,8 @@
 #include "Client.h"
 
 
-sedp::Client::Client(unsigned int id, unsigned int max_players):
-  client_id{id}, max_players{max_players}, dataset_size{0}
+sedp::Client::Client(unsigned int id, unsigned int max_players, string dataset):
+  client_id{id}, max_players{max_players}, dataset_size{0}, dataset_file_path{dataset}
 {
   cout << "Client " << client_id << endl;
 
@@ -25,7 +25,7 @@ void sedp::Client::init() {
 
   initialise_fields("Data/SharingData.txt");
 
-  inpf.open("Client_data" + to_string(client_id) + ".txt");
+  inpf.open(dataset_file_path);
 
   if (!inpf){
     throw file_error("Unable to read file..");

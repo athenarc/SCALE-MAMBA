@@ -1,0 +1,101 @@
+# noqa
+from Compiler import floatingpoint
+size_alloc = 69  # {{sizeAllocation}}
+decimal_accuracy = 0.00001  # {{precesion}}
+cells_x = 2  # {{cellsX}}
+cells_y = 3  # {{cellsY}}
+mask = sint.Array(size_alloc)  # add dynamic memory
+
+def output_random_triples(cond):
+  # naming as in Damgard et al
+  y, r, w = sint.get_random_triple()
+  v, un1, un2 = sint.get_random_triple()
+  u = v * r
+  outp = [y, r, w, v, u]
+  output_shares(2,*outp)
+  mask[cond] = y
+  return cond + 1
+
+open_channel(0)
+open_channel(1)
+
+n = regint.public_input(1)
+print_ln("Dataset size %s", n)
+
+open_channel(2)
+
+while_loop(output_random_triples, lambda x: x<size_alloc, 0)
+
+open_channel(3) # construct triples
+open_channel(4) # get data
+
+data_attribute1 = sint.Array(size_alloc/3)
+data_attribute2 = sfix.Array(size_alloc/3)
+
+def import_data(cond):
+  # naming as in Damgard et al
+  y = cint.public_input(1000)
+  categ = y + mask[3*cond]
+  # naming as in Damgard et al
+  y = cint.public_input(1000)
+  z = cint.public_input(1000)
+  intdata = y + mask[3*cond+1]
+  floatdata = z + mask[3*cond+2]
+  data_attribute1[cond] = categ
+  data_attribute2[cond] = sfix(intdata + sfloat(floatdata) * decimal_accuracy)
+  return cond + 1
+
+while_loop(import_data, lambda x: x < n/3, 0)
+
+close_channel(0)
+close_channel(1)
+close_channel(2)
+close_channel(3)
+close_channel(4)
+
+# --------------------------------------------------------------------------------------
+# ======================================================================================
+# --------------------------------------------------------------------------------------
+
+
+maximum_element_address2 = program.malloc(1, sfix)
+store_in_mem(data_attribute2[0], maximum_element_address2)
+minimum_element_address2 = program.malloc(1, sfix)
+store_in_mem(data_attribute2[0], minimum_element_address2)
+
+@for_range(n/3)
+def range_body(i):
+  min = sfix.load_mem(minimum_element_address2)
+  max = sfix.load_mem(maximum_element_address2)
+  min = min * (min <= data_attribute2[i]) + data_attribute2[i] * (min > data_attribute2[i])
+  max = max * (max >= data_attribute2[i]) + data_attribute2[i] * (max < data_attribute2[i])
+  store_in_mem(max, maximum_element_address2)
+  store_in_mem(min, minimum_element_address2)
+
+histogram = sint.Matrix(cells_x, cells_y)
+
+cellWidthAddress2 = program.malloc(1, sfix)
+max2 = sfix.load_mem(maximum_element_address2)
+min2 = sfix.load_mem(minimum_element_address2)
+cellWidth = (max2 - min2) / cells_y
+store_in_mem(cellWidth, cellWidthAddress2)
+
+@for_range(n/3)
+def range_body(i):
+  cell2 = (data_attribute2[i]-sfix.load_mem(minimum_element_address2)) / sfix.load_mem(cellWidthAddress2)
+  @for_range(cells_x)
+  def range_body2(j):
+      @for_range(cells_y)
+      def range_body3(k):
+        add_value = (cell2 >= sfix(k)) * (cell2 <= sfix(k+1)) * (data_attribute1[i] == j)
+        add_value = add_value + (cell2 > cells_y) * (k == cells_y-1) * (data_attribute1[i] == j)
+        histogram[j][k] = histogram[j][k] + add_value
+
+print_ln("OUTPUT START:")
+print_ln("%s, %s", min2.reveal(), max2.reveal())
+@for_range(cells_x)
+def range_body(i):
+  @for_range(cells_y)
+  def range_body(j):
+    print_ln("%s, %s, %s", i, j, histogram[i][j].reveal())
+print_ln("OUTPUT END")
