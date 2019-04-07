@@ -27,8 +27,8 @@ void sedp::Client::init() {
 
   inpf.open(dataset_file_path);
 
-  if (!inpf){
-    throw file_error("Unable to read file..");
+  if (inpf.fail()){
+    throw file_error(dataset_file_path.c_str());
   }
 
   while (inpf >> datum) {
