@@ -157,7 +157,6 @@ void sedp::Client::verify_triples() {
       cout << triples[i][2] << endl;
       // exit(1);
     }
-    cout << "Verified Tuple!" << endl;
   }
 }
 
