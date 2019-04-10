@@ -1,4 +1,3 @@
-# noqa
 from Compiler import floatingpoint
 size_alloc = 69  # {{sizeAllocation}}
 decimal_accuracy = 0.00001  # {{precesion}}

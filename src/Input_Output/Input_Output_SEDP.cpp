@@ -22,6 +22,11 @@ long Input_Output_SEDP::open_channel(unsigned int channel)
     s.init();
   }
 
+  if (channel == 1) {
+    cout << "@" << endl; // @ means the server is listening
+  }
+
+
   if (channel == 3) {
     cout << "Constructing triples!" << endl;
     s.construct_random_tuples();
@@ -31,7 +36,7 @@ long Input_Output_SEDP::open_channel(unsigned int channel)
     cout << "Getting data!" << endl;
     // s.construct_random_triples();
     data = s.get_data();
-    
+
     // for (auto &d : data) {
     //   cout << d << endl;
     // }
@@ -61,14 +66,14 @@ void Input_Output_SEDP::private_output_gfp(const gfp &output, unsigned int chann
 }
 
 gfp Input_Output_SEDP::public_input_gfp(unsigned int channel)
-{ 
+{
   gfp y;
   if (channel >= 1000){
     y = data.at(0);
     data.erase(data.begin());
     Update_Checker(y, channel);
     }
-  
+
   else {
     cout << "Enter value on channel " << channel << " : ";
     y.assign(0);
@@ -76,7 +81,7 @@ gfp Input_Output_SEDP::public_input_gfp(unsigned int channel)
     Update_Checker(y, channel);
   }
   return y;
-  
+
 }
 
 void Input_Output_SEDP::public_output_gfp(const gfp &output, unsigned int channel)
