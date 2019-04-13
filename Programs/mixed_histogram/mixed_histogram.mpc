@@ -46,11 +46,11 @@ def import_data(cond):
 
 while_loop(import_data, lambda x: x < n/3, 0)
 
-close_channel(0)
-close_channel(1)
-close_channel(2)
-close_channel(3)
 close_channel(4)
+close_channel(3)
+close_channel(2)
+close_channel(1)
+close_channel(0)
 
 # --------------------------------------------------------------------------------------
 # ======================================================================================
