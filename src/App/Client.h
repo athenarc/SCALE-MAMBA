@@ -12,18 +12,23 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <string.h>
-#include <App/App.h>
 #include <fstream>
 #include <mutex>
 #include <thread>
 #include <future>
 
+#include "App/App.h"
+#include "System/Player.h"
 #include "System/Networking.h"
 #include "Exceptions/Exceptions.h"
 #include "Tools/int.h"
 
 #include "Protocol.h"
 #include "ProtocolEntity.h"
+
+#include <openssl/bio.h>
+#include <openssl/ssl.h>
+#include <openssl/err.h>
 
 using namespace std;
 
@@ -37,9 +42,11 @@ namespace sedp {
     int dataset_size;
     mutex mtx;
     vector<vector<gfp>> triples;
-    vector<int> players;
+    vector<SSL *> players;
     vector<gfp> data, mask;
     vector <bigint> p;
+    const SSL_METHOD *method;
+    SSL *ssl;
 
     template <typename F>
     void execute(F cb);
@@ -54,7 +61,7 @@ namespace sedp {
     int get_id();
     void run_protocol();
     void handshake(int player_id);
-    int connect_to_player(string ip, int port);
+    SSL * connect_to_player(string ip, int port);
     void connect_to_players(const vector <pair <string, int>>& p_addresses);
     void send_dataset_size(int player_id);
     void compute_mask();

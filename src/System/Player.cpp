@@ -32,7 +32,6 @@ All rights reserved
 #include <fstream>
 #include <mutex>
 using namespace std;
-
 #include "Exceptions/Exceptions.h"
 #include "Networking.h"
 #include "Player.h"
@@ -42,7 +41,7 @@ SSL_CTX *InitCTX(void)
   const SSL_METHOD *method;
   SSL_CTX *ctx;
 
-  method= TLS_method();     /* create new server-method instance */
+  method= TLSv1_2_server_method();     /* create new server-method instance */
   ctx= SSL_CTX_new(method); /* create new context from method */
 
   if (ctx == NULL)

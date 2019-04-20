@@ -1,4 +1,5 @@
 #include "Server.h"
+#include "System/Player.cpp"
 
 sedp::Server::Server(unsigned int id, unsigned int port, unsigned int max_clients):
   ProtocolEntity(), player_id{id}, port_number{port}, max_clients{max_clients},
@@ -21,35 +22,57 @@ sedp::Server::~Server() {
 }
 
 void sedp::Server::init() {
- socket_id = OpenListener(port_number, max_clients);
- cout << "Server (Player) " << player_id << ": Start listening at port " << port_number << endl;
- protocol_state = State::HANDSHAKE;
- accept_thread = std::thread(&sedp::Server::accept_clients, this);
- handler_thread = std::thread(&sedp::Server::handle_clients, this);
+  SSL_load_error_strings();	
+  OpenSSL_add_ssl_algorithms();
+  OPENSSL_init_ssl(OPENSSL_INIT_LOAD_SSL_STRINGS | OPENSSL_INIT_LOAD_CRYPTO_STRINGS, NULL);
+  SSL_CTX * ctx= InitCTX();
+  // Load in my certificates
+  string str_crt= "/home/gpik/SCALE-MAMBA/Cert-Store/Player" + to_string(player_id+1) + ".crt";
+  string str_key= str_crt.substr(0, str_crt.length() - 3) + "key";
+  LoadCertificates(ctx, str_crt.c_str(), str_key.c_str());
+  SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT,
+  NULL);
+  string str= "/home/gpik/SCALE-MAMBA/Cert-Store/RootCA.crt";
+  SSL_CTX_set_client_CA_list(ctx, SSL_load_client_CA_file(str.c_str()));
+  SSL_CTX_load_verify_locations(ctx, str.c_str(), NULL);
+  ssl = SSL_new(ctx);
+  socket_id = OpenListener(port_number, max_clients);
+  int ret = SSL_set_fd(ssl, socket_id);
+  if (ret == 0){
+    throw SSL_error("SSL_set_fd");
+  }
+  cout << "Server (Player) " << player_id << ": Start listening at port " << port_number << endl;
+  protocol_state = State::HANDSHAKE;
+  accept_thread = std::thread(&sedp::Server::accept_clients, this);
+  handler_thread = std::thread(&sedp::Server::handle_clients, this);
 }
 
 void sedp::Server::set_p(bigint p_val){
   p = p_val;
 }
 
-int sedp::Server::accept_single_client() {
+SSL * sedp::Server::accept_single_client() {
   struct sockaddr_in addr;
   memset(&addr, 0, sizeof(addr));
   socklen_t len = sizeof(addr);
 
   cout << "Waiting for client connection" << endl;
 
-  int client_sd = accept(socket_id, (struct sockaddr *) &addr, &len);
-
-  if (client_sd == -1)
-  {
-    string err= "Unable to accept connections : Error code " + errno;
-    throw Networking_error(err);
+  while (1){
+  int client_sd = SSL_accept(ssl);
+  if (client_sd <= 0){
+      cout << SSL_get_error(ssl, client_sd) << endl;
+      ERR_print_errors_fp(stdout);
+      sleep(1);
+      //throw SSL_error("SSL_accept"); 
   }
+  else {break;}
+  }
+  cout << "SSL_connection established"<<endl;
 
   printf("Accepted Connection: %s:%d", inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
 
-  return client_sd;
+  return ssl;
 }
 
 bool sedp::Server::should_accept_clients() {
@@ -62,15 +85,13 @@ bool sedp::Server::should_handle_clients() {
   return handled_clients < max_clients;
 }
 
-void sedp::Server::handshake(int client_sd) {
-  send_int_to(client_sd, player_id);
-  int client_id = receive_int_from(client_sd);
-  int dataset_size = receive_int_from(client_sd);
-
-  vector<int> c{client_sd, dataset_size};
-
+void sedp::Server::handshake(SSL* ssl) {
+  send_int_to(ssl, player_id);
+  int client_id = receive_int_from(ssl);
+  int dataset_size = receive_int_from(ssl);
   lock_guard<mutex> g{mtx};
-  clients.insert(pair<int, vector<int>>(client_id, c));
+  vector<int>c{client_id,dataset_size};
+  clients.insert(pair<vector<int>, SSL *>(c, ssl));
   total_data += dataset_size;
 
   cout << "Client with id " << client_id << " connected." <<endl;
@@ -126,24 +147,24 @@ void sedp::Server::put_random_triple(vector<gfp>& triple_share) {
   }
 }
 
-void sedp::Server::send_random_triples(int client_sd, int start, int end) {
+void sedp::Server::send_random_triples(SSL* ssl, int start, int end) {
   cout << "Thread:" << this_thread::get_id() << " Sending my Shares..." << endl;
 
   for (int i = start; i < end; i++) {
     string s;
     pack(random_triples.at(i), s);
-    send_to(client_sd, s);
+    send_to(ssl, s);
   }
 
   cout << " Succesfully sent my shares!" << endl;
 }
 
-void sedp::Server::get_private_inputs(int client_sd, int dataset_size, int start, vector<gfp>& vc) {
+void sedp::Server::get_private_inputs(SSL* ssl, int dataset_size, int start, vector<gfp>& vc) {
   cout << "Thread:" << this_thread::get_id() << " Importing data..." << endl;
 
   for (int i = 0; i < dataset_size; i++) {
     string s;
-    receive_from(client_sd, s);
+    receive_from(ssl, s);
 
     gfp y = str_to_gfp(s);
     vc.push_back(y);
@@ -153,15 +174,15 @@ void sedp::Server::get_private_inputs(int client_sd, int dataset_size, int start
 
 void sedp::Server::accept_clients() {
   while(should_accept_clients()) {
-    int client_sd = accept_single_client();
-    pending_clients.put(client_sd);
+    SSL* ssl = accept_single_client();
+    pending_clients.put(ssl);
     accepted_clients++;
   }
 }
 
 void sedp::Server::handle_clients() {
   while(should_handle_clients()) {
-    int csd;
+    SSL* csd;
     pending_clients.get(csd);
     handshake(csd);
     handled_clients++;
@@ -180,26 +201,27 @@ void sedp::Server::handle_clients() {
   }
 
   vector<future<vector<gfp>>> responses;
-  map<int, vector<int>>::iterator itr;
+  map<vector<int>, SSL*>::iterator itr;
   int start = 0;
   int end = 0;
 
   for (itr = clients.begin(); itr != clients.end(); ++itr) {
-    int client_sd = itr->second[0];
-    int dataset_size = itr->second[1];
+    int client_id = itr->first[0];
+    int dataset_size = itr -> first[1];
+    SSL* ssl = itr->second;
 
     end += dataset_size;
 
-    responses.push_back(async(launch::async, [this](int client_sd, int dataset_size, int start, int end)->vector<gfp> // return vector<int>
+    responses.push_back(async(launch::async, [this](SSL* ssl, int dataset_size, int start, int end)->vector<gfp> // return vector<int>
       {
         vector<gfp> v;
         v.reserve(dataset_size);
-        send_random_triples(client_sd, start, end);
-        get_private_inputs(client_sd, dataset_size, start, v);
+        send_random_triples(ssl, start, end);
+        get_private_inputs(ssl, dataset_size, start, v);
 
         return v;
       },
-      client_sd, dataset_size, start, end
+      ssl, dataset_size, start, end
     ));
 
     start += dataset_size;

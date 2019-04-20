@@ -1,11 +1,13 @@
-#include <thread>
-#include <mutex>
 #include "Client.h"
+#include "System/Player.cpp"
 
 
 sedp::Client::Client(unsigned int id, unsigned int max_players, string dataset):
   client_id{id}, max_players{max_players}, dataset_size{0}, dataset_file_path{dataset}
 {
+  OpenSSL_add_all_algorithms();
+  SSL_load_error_strings();
+  method = TLSv1_2_client_method();    
   cout << "Client " << client_id << endl;
 
 }
@@ -13,9 +15,9 @@ sedp::Client::Client(unsigned int id, unsigned int max_players, string dataset):
 sedp::Client::~Client() {
   cout << "Closing client..." << endl;
 
-  for (vector<int>::iterator it = players.begin() ; it != players.end(); ++it){
-    close(*it);
-  }
+  // for (vector<SSL *>::iterator it = players.begin() ; it != players.end(); ++it){
+  //   SSL_close(*it);
+  // }
 
   cout << "Client closed!"<<endl;
 }
@@ -63,11 +65,18 @@ void sedp::Client::initialise_fields(const string& filename)
   gf2n::init_field(128); // Assumes 128-bit prime generation
 }
 
-int sedp::Client::connect_to_player(string ip, int port) {
+SSL * sedp::Client::connect_to_player(string ip, int port) {
 
   int socket_id = OpenConnection(ip, port);
-
-  return socket_id;
+  SSL_CTX * ctx;
+  LoadCertificates(ctx, "/home/gpik/SCALE-MAMBA/Cert-Store/RootCA.crt","/home/gpik/SCALE-MAMBA/Cert-Store/RootCA.key");
+  ssl = SSL_new(ctx);
+  SSL_set_fd(ssl, socket_id);
+  if ( SSL_connect(ssl) <= 0 ){   /* perform the connection */
+    ERR_print_errors_fp(stderr);
+  }
+  cout << "SSL_connection established"<<endl;
+  return ssl;
 }
 
 void sedp::Client::handshake(int player_id) {
@@ -82,7 +91,7 @@ void sedp::Client::connect_to_players(const vector <pair <string, int>>& player_
   vector<pair <string, int>>::const_iterator it;
 
   for (it = player_addresses.begin() ; it != player_addresses.end(); ++it) {
-    int player_sd = connect_to_player((*it).first, (*it).second);
+    SSL * player_sd = connect_to_player((*it).first, (*it).second);
     players.push_back(player_sd);
   }
 

@@ -12,6 +12,10 @@
 #include "Math/gfp.h"
 #include "Math/gf2n.h"
 
+#include <openssl/bio.h>
+#include <openssl/ssl.h>
+#include <openssl/err.h>
+
 namespace sedp {
   class ProtocolEntity {
   private:
@@ -20,12 +24,12 @@ namespace sedp {
   public:
     ProtocolEntity() {};
 
-    void send_msg(int socket, const void *msg, int len);
-    void receive_msg(int socket, uint8_t *msg, int len);
-    void send_to(int socket, const string &o);
-    void receive_from(int socket, string &o); 
-    void send_int_to(int socket, unsigned int x);
-    int receive_int_from(int socket);
+    void send_msg(SSL *ssl, const void *msg, int len);
+    void receive_msg(SSL *ssl, uint8_t *msg, int len);
+    void send_to(SSL *ssl, const string &o);
+    void receive_from(SSL *ssl, string &o); 
+    void send_int_to(SSL *, unsigned int x);
+    int receive_int_from(SSL *);
     void safe_print(const string& s);
     void pack(const vector<gfp>& v, string& s);
     void unpack(const string& s, vector<gfp>& v);
