@@ -1,15 +1,15 @@
 #include "Client.h"
-#include "System/Player.cpp"
+// #include "System/Player.cpp"
 
 
 sedp::Client::Client(unsigned int id, unsigned int max_players, string dataset):
   client_id{id}, max_players{max_players}, dataset_size{0}, dataset_file_path{dataset}
 {
-  OpenSSL_add_all_algorithms();
+  SystemData SD("/home/gpik/SCALE-MAMBA/Data/NetworkData.txt");
+  ssl.resize(max_players);
   SSL_load_error_strings();
-  method = TLSv1_2_client_method();    
-  cout << "Client " << client_id << endl;
-
+  OPENSSL_init_ssl(OPENSSL_INIT_LOAD_SSL_STRINGS | OPENSSL_INIT_LOAD_CRYPTO_STRINGS, NULL);
+  
 }
 
 sedp::Client::~Client() {
@@ -66,17 +66,24 @@ void sedp::Client::initialise_fields(const string& filename)
 }
 
 SSL * sedp::Client::connect_to_player(string ip, int port) {
-
+  const SSL_METHOD *method = TLS_client_method();
   int socket_id = OpenConnection(ip, port);
-  SSL_CTX * ctx;
+  SSL_CTX * ctx = SSL_CTX_new(method);
+  if (ctx == NULL)
+    {
+      ERR_print_errors_fp(stdout);
+      throw SSL_error("InitCTX");
+    }
+
+  SSL_CTX_set_mode(ctx, SSL_MODE_AUTO_RETRY);
   LoadCertificates(ctx, "/home/gpik/SCALE-MAMBA/Cert-Store/RootCA.crt","/home/gpik/SCALE-MAMBA/Cert-Store/RootCA.key");
-  ssl = SSL_new(ctx);
-  SSL_set_fd(ssl, socket_id);
-  if ( SSL_connect(ssl) <= 0 ){   /* perform the connection */
+  SSL *ssl_ = SSL_new(ctx);
+  SSL_set_fd(ssl_, socket_id);
+  if ( SSL_connect(ssl_) <= 0 ){   /* perform the connection */
     ERR_print_errors_fp(stderr);
   }
   cout << "SSL_connection established"<<endl;
-  return ssl;
+  return ssl_;
 }
 
 void sedp::Client::handshake(int player_id) {

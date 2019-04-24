@@ -41,7 +41,7 @@ SSL_CTX *InitCTX(void)
   const SSL_METHOD *method;
   SSL_CTX *ctx;
 
-  method= TLSv1_2_server_method();     /* create new server-method instance */
+  method= TLS_method();     /* create new server-method instance */
   ctx= SSL_CTX_new(method); /* create new context from method */
 
   if (ctx == NULL)

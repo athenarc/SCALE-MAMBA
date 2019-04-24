@@ -11,6 +11,8 @@ all: $(LIB) Setup.x Player.x Server-Api.x Client-Api.x
 
 api: $(LIB) Server-Api.x Client-Api.x 
 
+testssl: $(LIB) testserver.x testclient.x
+
 OFFLINE = $(patsubst %.cpp,%.o,$(wildcard Offline/*.cpp))
 ONLINE = $(patsubst %.cpp,%.o,$(wildcard Online/*.cpp))
 SYSTEM = $(patsubst %.cpp,%.o,$(wildcard System/*.cpp))
@@ -30,7 +32,7 @@ LIB = libMPC.a
 
 OBJ = Setup.o Player.o
 
-API_OBJ = Server-Api.o Client-Api.o
+API_OBJ = Server-Api.o Client-Api.o 
 API_SRC = Server-Api.cpp Client-Api.cpp
 
 SRC = Setup.cpp Player.cpp Server-Api.cpp Client-Api.cpp
@@ -62,7 +64,6 @@ Server-Api.x: $(API_OBJ) $(LIB)
 Client-Api.x: $(API_OBJ) $(LIB)
 	$(CC) $(CFLAGS) -o Client-Api.x Client-Api.o $(LIB) $(LDLIBS)
 	- mv Client-Api.x ../
-
 
 clean:
 	- rm *.x *.o libMPC.a

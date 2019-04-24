@@ -46,7 +46,7 @@ namespace sedp {
     vector<gfp> data, mask;
     vector <bigint> p;
     const SSL_METHOD *method;
-    SSL *ssl;
+    vector <SSL *> ssl;
 
     template <typename F>
     void execute(F cb);
