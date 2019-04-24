@@ -1,15 +1,9 @@
 #include "Client.h"
-// #include "System/Player.cpp"
-
 
 sedp::Client::Client(unsigned int id, unsigned int max_players, string dataset):
   client_id{id}, max_players{max_players}, dataset_size{0}, dataset_file_path{dataset}
 {
-  SystemData SD("/home/gpik/SCALE-MAMBA/Data/NetworkData.txt");
   ssl.resize(max_players);
-  SSL_load_error_strings();
-  OPENSSL_init_ssl(OPENSSL_INIT_LOAD_SSL_STRINGS | OPENSSL_INIT_LOAD_CRYPTO_STRINGS, NULL);
-  
 }
 
 sedp::Client::~Client() {
@@ -46,6 +40,70 @@ void sedp::Client::init() {
 
   // Initialize shares matrix
   triples.assign(dataset_size, vector<gfp>(5));
+  Init_SSL_CTX(ctx, client_id);
+}
+
+SSL_CTX *InitCTX(void)
+{
+  const SSL_METHOD *method;
+  SSL_CTX *ctx;
+
+  method= TLS_method();     /* create new server-method instance */
+  ctx= SSL_CTX_new(method); /* create new context from method */
+
+  if (ctx == NULL)
+    {
+      ERR_print_errors_fp(stdout);
+      throw SSL_error("InitCTX");
+    }
+
+  SSL_CTX_set_mode(ctx, SSL_MODE_AUTO_RETRY);
+
+  return ctx;
+}
+
+void sedp::Client::Init_SSL_CTX(SSL_CTX *&ctx, unsigned int me)
+{
+  // Initialize the SSL library
+  OPENSSL_init_ssl(
+      OPENSSL_INIT_LOAD_SSL_STRINGS | OPENSSL_INIT_LOAD_CRYPTO_STRINGS, NULL);
+  ctx = InitCTX();
+
+  // Load in my certificates
+  string str_crt= "Cert-Store/Client" + to_string(client_id) + ".crt";
+  string str_key= str_crt.substr(0, str_crt.length() - 3) + "key";
+  cout << str_crt << str_key << endl;
+  LoadCertificates(ctx, str_crt.c_str(), str_key.c_str());
+
+  // Turn on client auth via cert
+  SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT,
+                     NULL);
+
+  // Load in root CA
+  string str= "Cert-Store/RootCA.crt";
+  SSL_CTX_set_client_CA_list(ctx, SSL_load_client_CA_file(str.c_str()));
+  SSL_CTX_load_verify_locations(ctx, str.c_str(), NULL);
+}
+
+void sedp::Client::LoadCertificates(SSL_CTX *ctx, const char *CertFile, const char *KeyFile)
+{
+  /* set the local certificate from CertFile */
+  if (SSL_CTX_use_certificate_file(ctx, CertFile, SSL_FILETYPE_PEM) <= 0)
+    {
+      ERR_print_errors_fp(stdout);
+      throw SSL_error("LoadCertificates 1");
+    }
+  /* set the private key from KeyFile (may be the same as CertFile) */
+  if (SSL_CTX_use_PrivateKey_file(ctx, KeyFile, SSL_FILETYPE_PEM) <= 0)
+    {
+      ERR_print_errors_fp(stdout);
+      throw SSL_error("LoadCertificates 2");
+    }
+  /* verify private key */
+  if (!SSL_CTX_check_private_key(ctx))
+    {
+      throw SSL_error("Private key does not match the public certificate");
+    }
 }
 
 void sedp::Client::initialise_fields(const string& filename)
@@ -65,23 +123,17 @@ void sedp::Client::initialise_fields(const string& filename)
   gf2n::init_field(128); // Assumes 128-bit prime generation
 }
 
-SSL * sedp::Client::connect_to_player(string ip, int port) {
-  const SSL_METHOD *method = TLS_client_method();
-  int socket_id = OpenConnection(ip, port);
-  SSL_CTX * ctx = SSL_CTX_new(method);
-  if (ctx == NULL)
-    {
-      ERR_print_errors_fp(stdout);
-      throw SSL_error("InitCTX");
-    }
 
-  SSL_CTX_set_mode(ctx, SSL_MODE_AUTO_RETRY);
-  LoadCertificates(ctx, "/home/gpik/SCALE-MAMBA/Cert-Store/RootCA.crt","/home/gpik/SCALE-MAMBA/Cert-Store/RootCA.key");
+SSL * sedp::Client::connect_to_player(string ip, int port) {
+  int socket_id = OpenConnection(ip, port);
+
   SSL *ssl_ = SSL_new(ctx);
+
   SSL_set_fd(ssl_, socket_id);
   if ( SSL_connect(ssl_) <= 0 ){   /* perform the connection */
     ERR_print_errors_fp(stderr);
   }
+
   cout << "SSL_connection established"<<endl;
   return ssl_;
 }

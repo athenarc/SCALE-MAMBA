@@ -47,6 +47,7 @@ namespace sedp {
     vector <bigint> p;
     const SSL_METHOD *method;
     vector <SSL *> ssl;
+    SSL_CTX *ctx;
 
     template <typename F>
     void execute(F cb);
@@ -61,6 +62,7 @@ namespace sedp {
     int get_id();
     void run_protocol();
     void handshake(int player_id);
+    void LoadCertificates(SSL_CTX *ctx, const char *CertFile, const char *KeyFile);
     SSL * connect_to_player(string ip, int port);
     void connect_to_players(const vector <pair <string, int>>& p_addresses);
     void send_dataset_size(int player_id);
@@ -68,6 +70,7 @@ namespace sedp {
     void send_private_inputs(int player_id);
     void get_random_tuples(int player_id);
     void init();
+    void Init_SSL_CTX(SSL_CTX *&ctx, unsigned int me);
     void initialise_fields(const string& filename);
     void verify_triples();
   };
