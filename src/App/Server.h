@@ -36,8 +36,6 @@
 #include "ProtocolEntity.h"
 #include "Concurrent_Queue.h"
 
-#include "System/Player.cpp"
-
 using namespace std;
 
 namespace sedp {
@@ -64,6 +62,7 @@ namespace sedp {
     condition_variable protocol_cond;
     SSL_METHOD *method;
     SSL *ssl;
+    SSL_CTX *ctx;
 
     bigint p;
 
@@ -77,6 +76,7 @@ namespace sedp {
 
     ~Server();
     void init();
+    void init_ssl();
     void set_p(bigint p_val);
     void accept_clients();
     SSL * accept_single_client();

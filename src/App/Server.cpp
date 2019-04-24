@@ -3,33 +3,11 @@
 sedp::Server::Server(unsigned int id, unsigned int port, unsigned int max_clients){
   ProtocolEntity();
   player_id = id;
-  port_number = port; 
+  port_number = port;
   max_clients = max_clients;
-  accepted_clients = 0; 
-  handled_clients = 0; 
+  accepted_clients = 0;
+  handled_clients = 0;
   total_data = 0;
-  SystemData SD("/home/gpik/SCALE-MAMBA/Data/NetworkData.txt");
-
-  SSL_load_error_strings();
-  OPENSSL_init_ssl(OPENSSL_INIT_LOAD_SSL_STRINGS | OPENSSL_INIT_LOAD_CRYPTO_STRINGS, NULL);
-  
-  SSL_CTX * ctx= InitCTX();
-
-  // Load in my certificates
-  string str_crt= "Cert-Store/" + SD.PlayerCRT[player_id];
-  string str_key= str_crt.substr(0, str_crt.length() - 3) + "key";
-  LoadCertificates(ctx, str_crt.c_str(), str_key.c_str());
-
-  // Turn on client auth via cert
-  SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT,
-                    NULL);
-
-  // Load in root CA
-  string str= "Cert-Store/" + SD.RootCRT;
-  SSL_CTX_set_client_CA_list(ctx, SSL_load_client_CA_file(str.c_str()));
-  SSL_CTX_load_verify_locations(ctx, str.c_str(), NULL);
-  
-  ssl = SSL_new(ctx);
 };
 
 sedp::Server::~Server() {
@@ -49,6 +27,7 @@ sedp::Server::~Server() {
 }
 
 void sedp::Server::init() {
+  init_ssl();
   socket_id = OpenListener(port_number, max_clients);
   struct sockaddr_in addr;
   memset(&addr, 0, sizeof(addr));
@@ -59,6 +38,12 @@ void sedp::Server::init() {
 
   accept_thread = std::thread(&sedp::Server::accept_clients, this);
   handler_thread = std::thread(&sedp::Server::handle_clients, this);
+}
+
+void sedp::Server::init_ssl() {
+  SystemData SD("Data/NetworkData.txt");
+  Init_SSL_CTX(ctx, player_id, SD);
+  ssl = SSL_new(ctx);
 }
 
 void sedp::Server::set_p(bigint p_val){
@@ -74,17 +59,20 @@ SSL * sedp::Server::accept_single_client() {
   int client_sd = accept(socket_id, (struct sockaddr *) &addr, &len);
 
   int ret = SSL_set_fd(ssl, client_sd);
+
   if (ret == 0){
     throw SSL_error("SSL_set_fd");
   }
 
   ret = SSL_accept(ssl);
-  if (ret <= 0){
+
+  if (ret <= 0) {
       cout << SSL_get_error(ssl, ret) << endl;
       ERR_print_errors_fp(stdout);
-      throw SSL_error("SSL_accept"); 
+      throw SSL_error("SSL_accept");
   }
-  cout << "SSL_connection established"<<endl;
+
+  cout << "SSL_connection established" << endl;
 
   printf("Accepted Connection: %s:%d", inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
 
