@@ -72,7 +72,7 @@ namespace sedp {
     ifstream inpf;
     ofstream outf;
 
-    Server(unsigned int id, unsigned int port, unsigned int max_clients);
+    Server(unsigned int id, unsigned int port, unsigned int expected_clients);
 
     ~Server();
     void init();

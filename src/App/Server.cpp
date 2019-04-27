@@ -1,10 +1,10 @@
 #include "Server.h"
 
-sedp::Server::Server(unsigned int id, unsigned int port, unsigned int max_clients){
+sedp::Server::Server(unsigned int id, unsigned int port, unsigned int expected_clients){
   ProtocolEntity();
   player_id = id;
   port_number = port;
-  max_clients = max_clients;
+  max_clients = expected_clients;
   accepted_clients = 0;
   handled_clients = 0;
   total_data = 0;
@@ -43,7 +43,7 @@ void sedp::Server::init() {
 void sedp::Server::init_ssl() {
   SystemData SD("Data/NetworkData.txt");
   Init_SSL_CTX(ctx, player_id, SD);
-  ssl = SSL_new(ctx);
+  unsigned int counter = 0;
 }
 
 void sedp::Server::set_p(bigint p_val){
@@ -54,7 +54,7 @@ SSL * sedp::Server::accept_single_client() {
   struct sockaddr_in addr;
   memset(&addr, 0, sizeof(addr));
   socklen_t len = sizeof(addr);
-
+  ssl = SSL_new(ctx);
   cout << "Waiting for client connection" << endl;
   int client_sd = accept(socket_id, (struct sockaddr *) &addr, &len);
 
@@ -178,8 +178,8 @@ void sedp::Server::get_private_inputs(SSL* ssl, int dataset_size, int start, vec
 
 void sedp::Server::accept_clients() {
   while(should_accept_clients()) {
-    accept_single_client();
-    pending_clients.put(ssl);
+    SSL * new_ssl = accept_single_client();
+    pending_clients.put(new_ssl);
     accepted_clients++;
   }
 }
