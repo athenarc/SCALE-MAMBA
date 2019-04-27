@@ -70,7 +70,7 @@ namespace sedp {
     void send_private_inputs(int player_id);
     void get_random_tuples(int player_id);
     void init();
-    void Init_SSL_CTX(SSL_CTX *&ctx, unsigned int me);
+    void Init_SSL_CTX(SSL_CTX *&ctx);
     void initialise_fields(const string& filename);
     void verify_triples();
   };

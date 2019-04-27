@@ -40,7 +40,7 @@ void sedp::Client::init() {
 
   // Initialize shares matrix
   triples.assign(dataset_size, vector<gfp>(5));
-  Init_SSL_CTX(ctx, client_id);
+  Init_SSL_CTX(ctx);
 }
 
 SSL_CTX *InitCTX(void)
@@ -62,7 +62,7 @@ SSL_CTX *InitCTX(void)
   return ctx;
 }
 
-void sedp::Client::Init_SSL_CTX(SSL_CTX *&ctx, unsigned int me)
+void sedp::Client::Init_SSL_CTX(SSL_CTX *&ctx)
 {
   // Initialize the SSL library
   OPENSSL_init_ssl(

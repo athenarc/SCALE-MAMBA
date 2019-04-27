@@ -53,7 +53,7 @@ SSL * sedp::Server::accept_single_client() {
   struct sockaddr_in addr;
   memset(&addr, 0, sizeof(addr));
   socklen_t len = sizeof(addr);
-  ssl = SSL_new(ctx);
+  SSL* ssl = SSL_new(ctx);
   cout << "Waiting for client connection" << endl;
   int client_sd = accept(socket_id, (struct sockaddr *) &addr, &len);
 
@@ -177,8 +177,8 @@ void sedp::Server::get_private_inputs(SSL* ssl, int dataset_size, int start, vec
 
 void sedp::Server::accept_clients() {
   while(should_accept_clients()) {
-    SSL * new_ssl = accept_single_client();
-    pending_clients.put(new_ssl);
+    SSL *ssl = accept_single_client();
+    pending_clients.put(ssl);
     accepted_clients++;
   }
 }

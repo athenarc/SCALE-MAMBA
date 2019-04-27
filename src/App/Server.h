@@ -60,8 +60,6 @@ namespace sedp {
     vector<tuple<int, gfp, gfp>> random_integers;
     map<vector<int>, SSL *> clients;
     condition_variable protocol_cond;
-    SSL_METHOD *method;
-    SSL *ssl;
     SSL_CTX *ctx;
 
     bigint p;
