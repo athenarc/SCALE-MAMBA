@@ -11,8 +11,6 @@ all: $(LIB) Setup.x Player.x Server-Api.x Client-Api.x
 
 api: $(LIB) Server-Api.x Client-Api.x 
 
-testssl: $(LIB) testserver.x testclient.x
-
 OFFLINE = $(patsubst %.cpp,%.o,$(wildcard Offline/*.cpp))
 ONLINE = $(patsubst %.cpp,%.o,$(wildcard Online/*.cpp))
 SYSTEM = $(patsubst %.cpp,%.o,$(wildcard System/*.cpp))
