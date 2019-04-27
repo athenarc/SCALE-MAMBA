@@ -43,7 +43,6 @@ void sedp::Server::init() {
 void sedp::Server::init_ssl() {
   SystemData SD("Data/NetworkData.txt");
   Init_SSL_CTX(ctx, player_id, SD);
-  unsigned int counter = 0;
 }
 
 void sedp::Server::set_p(bigint p_val){
