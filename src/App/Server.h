@@ -31,6 +31,7 @@
 #include "Exceptions/Exceptions.h"
 #include "Tools/int.h"
 
+#include "System/Player.h"
 #include "Protocol.h"
 #include "ProtocolEntity.h"
 #include "Concurrent_Queue.h"
@@ -53,12 +54,13 @@ namespace sedp {
     mutex mtx;
     mutex mtx_data;
     mutex mtx_protocol;
-    Concurrent_Queue<int> pending_clients;
+    Concurrent_Queue<SSL*> pending_clients;
     vector<gfp> data;
     vector<vector<gfp>> random_triples;
     vector<tuple<int, gfp, gfp>> random_integers;
-    map<int, vector<int>> clients;
+    map<vector<int>, SSL *> clients;
     condition_variable protocol_cond;
+    SSL_CTX *ctx;
 
     bigint p;
 
@@ -68,20 +70,21 @@ namespace sedp {
     ifstream inpf;
     ofstream outf;
 
-    Server(unsigned int id, unsigned int port, unsigned int max_clients);
+    Server(unsigned int id, unsigned int port, unsigned int expected_clients);
 
     ~Server();
     void init();
+    void init_ssl();
     void set_p(bigint p_val);
     void accept_clients();
-    int accept_single_client();
+    SSL * accept_single_client();
     bool should_accept_clients();
     bool should_handle_clients();
-    void handshake(int client_sd);
+    void handshake(SSL * client_sd);
     int get_data_size();
     void put_random_triple(vector<gfp>& triple_share);
-    void send_random_triples(int client_sd, int start, int end);
-    void get_private_inputs(int client_sd, int dataset_size, int start, vector<gfp>& vc);
+    void send_random_triples(SSL* ssl, int start, int end);
+    void get_private_inputs(SSL* ssl, int dataset_size, int start, vector<gfp>& vc);
     vector<gfp> &get_data();
     void add_random_sint_share(tuple<int, gfp, gfp>& r);
     void construct_random_tuples();

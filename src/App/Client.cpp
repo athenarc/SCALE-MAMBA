@@ -1,21 +1,17 @@
-#include <thread>
-#include <mutex>
 #include "Client.h"
-
 
 sedp::Client::Client(unsigned int id, unsigned int max_players, string dataset):
   client_id{id}, max_players{max_players}, dataset_size{0}, dataset_file_path{dataset}
 {
-  cout << "Client " << client_id << endl;
-
+  ssl.resize(max_players);
 }
 
 sedp::Client::~Client() {
   cout << "Closing client..." << endl;
 
-  for (vector<int>::iterator it = players.begin() ; it != players.end(); ++it){
-    close(*it);
-  }
+  // for (vector<SSL *>::iterator it = players.begin() ; it != players.end(); ++it){
+  //   SSL_close(*it);
+  // }
 
   cout << "Client closed!"<<endl;
 }
@@ -44,6 +40,70 @@ void sedp::Client::init() {
 
   // Initialize shares matrix
   triples.assign(dataset_size, vector<gfp>(5));
+  Init_SSL_CTX(ctx);
+}
+
+SSL_CTX *InitCTX(void)
+{
+  const SSL_METHOD *method;
+  SSL_CTX *ctx;
+
+  method= TLS_method();     /* create new server-method instance */
+  ctx= SSL_CTX_new(method); /* create new context from method */
+
+  if (ctx == NULL)
+    {
+      ERR_print_errors_fp(stdout);
+      throw SSL_error("InitCTX");
+    }
+
+  SSL_CTX_set_mode(ctx, SSL_MODE_AUTO_RETRY);
+
+  return ctx;
+}
+
+void sedp::Client::Init_SSL_CTX(SSL_CTX *&ctx)
+{
+  // Initialize the SSL library
+  OPENSSL_init_ssl(
+      OPENSSL_INIT_LOAD_SSL_STRINGS | OPENSSL_INIT_LOAD_CRYPTO_STRINGS, NULL);
+  ctx = InitCTX();
+
+  // Load in my certificates
+  string str_crt= "Cert-Store/Client" + to_string(client_id) + ".crt";
+  string str_key= str_crt.substr(0, str_crt.length() - 3) + "key";
+  cout << str_crt << str_key << endl;
+  LoadCertificates(ctx, str_crt.c_str(), str_key.c_str());
+
+  // Turn on client auth via cert
+  SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT,
+                     NULL);
+
+  // Load in root CA
+  string str= "Cert-Store/RootCA.crt";
+  SSL_CTX_set_client_CA_list(ctx, SSL_load_client_CA_file(str.c_str()));
+  SSL_CTX_load_verify_locations(ctx, str.c_str(), NULL);
+}
+
+void sedp::Client::LoadCertificates(SSL_CTX *ctx, const char *CertFile, const char *KeyFile)
+{
+  /* set the local certificate from CertFile */
+  if (SSL_CTX_use_certificate_file(ctx, CertFile, SSL_FILETYPE_PEM) <= 0)
+    {
+      ERR_print_errors_fp(stdout);
+      throw SSL_error("LoadCertificates 1");
+    }
+  /* set the private key from KeyFile (may be the same as CertFile) */
+  if (SSL_CTX_use_PrivateKey_file(ctx, KeyFile, SSL_FILETYPE_PEM) <= 0)
+    {
+      ERR_print_errors_fp(stdout);
+      throw SSL_error("LoadCertificates 2");
+    }
+  /* verify private key */
+  if (!SSL_CTX_check_private_key(ctx))
+    {
+      throw SSL_error("Private key does not match the public certificate");
+    }
 }
 
 void sedp::Client::initialise_fields(const string& filename)
@@ -63,11 +123,19 @@ void sedp::Client::initialise_fields(const string& filename)
   gf2n::init_field(128); // Assumes 128-bit prime generation
 }
 
-int sedp::Client::connect_to_player(string ip, int port) {
 
+SSL * sedp::Client::connect_to_player(string ip, int port) {
   int socket_id = OpenConnection(ip, port);
 
-  return socket_id;
+  SSL *ssl_ = SSL_new(ctx);
+
+  SSL_set_fd(ssl_, socket_id);
+  if ( SSL_connect(ssl_) <= 0 ){   /* perform the connection */
+    ERR_print_errors_fp(stderr);
+  }
+
+  cout << "SSL_connection established"<<endl;
+  return ssl_;
 }
 
 void sedp::Client::handshake(int player_id) {
@@ -82,7 +150,7 @@ void sedp::Client::connect_to_players(const vector <pair <string, int>>& player_
   vector<pair <string, int>>::const_iterator it;
 
   for (it = player_addresses.begin() ; it != player_addresses.end(); ++it) {
-    int player_sd = connect_to_player((*it).first, (*it).second);
+    SSL * player_sd = connect_to_player((*it).first, (*it).second);
     players.push_back(player_sd);
   }
 

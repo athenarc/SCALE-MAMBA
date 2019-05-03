@@ -32,7 +32,6 @@ All rights reserved
 #include <fstream>
 #include <mutex>
 using namespace std;
-
 #include "Exceptions/Exceptions.h"
 #include "Networking.h"
 #include "Player.h"

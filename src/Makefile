@@ -3,13 +3,13 @@ include ../CONFIG.mine
 
 CC = g++
 
-CFLAGS = -Wall -std=c++11 -pedantic -Wextra -g -pthread -I$(ROOT)/src -maes -mpclmul -msse4.1 -mavx -march=core2 $(FLAGS) $(OPT) -I$(OSSL)/include
+CFLAGS = -Wall -std=c++11 -pedantic -Wextra -g -pthread -I -Wfatal-errors$(ROOT)/src -maes -mpclmul -msse4.1 -mavx -march=core2 $(FLAGS) $(OPT) -I$(OSSL)/include
 CPPFLAGS = $(CFLAGS)
 LDLIBS = -L/$(OSSL)/lib -lm -lssl -lcrypto -lmpirxx -lmpir -lcryptopp $(LDFLAGS)
 
 all: $(LIB) Setup.x Player.x Server-Api.x Client-Api.x
 
-api: $(LIB) Server-Api.x Client-Api.x
+api: $(LIB) Server-Api.x Client-Api.x 
 
 OFFLINE = $(patsubst %.cpp,%.o,$(wildcard Offline/*.cpp))
 ONLINE = $(patsubst %.cpp,%.o,$(wildcard Online/*.cpp))
@@ -30,7 +30,7 @@ LIB = libMPC.a
 
 OBJ = Setup.o Player.o
 
-API_OBJ = Server-Api.o Client-Api.o
+API_OBJ = Server-Api.o Client-Api.o 
 API_SRC = Server-Api.cpp Client-Api.cpp
 
 SRC = Setup.cpp Player.cpp Server-Api.cpp Client-Api.cpp
@@ -62,7 +62,6 @@ Server-Api.x: $(API_OBJ) $(LIB)
 Client-Api.x: $(API_OBJ) $(LIB)
 	$(CC) $(CFLAGS) -o Client-Api.x Client-Api.o $(LIB) $(LDLIBS)
 	- mv Client-Api.x ../
-
 
 clean:
 	- rm *.x *.o libMPC.a
