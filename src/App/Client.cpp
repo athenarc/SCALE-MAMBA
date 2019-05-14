@@ -244,13 +244,13 @@ void sedp::Client::run_protocol() {
       }
 
       case State::RANDOMNESS: {
+        execute(&Client::get_random_tuples);
+        verify_triples();
         protocol_state = State::DATA;
         break;
       }
 
       case State::DATA: {
-        execute(&Client::get_random_tuples);
-        verify_triples();
         cout << "Computing Mask ..." << endl;
         compute_mask();
         cout << "Mask Computed ..." << endl;
