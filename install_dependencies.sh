@@ -1,4 +1,4 @@
-mylocal="$HOME/local"
+mylocal=$1
 mkdir -p ${mylocal}
 cd ${mylocal}
 
@@ -20,6 +20,7 @@ cd openssl-1.1.0j
 make && make install
 
 # install crypto++
+cd $mylocal
 curl -O https://www.cryptopp.com/cryptopp800.zip
 unzip cryptopp800.zip -d cryptopp800
 cd cryptopp800
