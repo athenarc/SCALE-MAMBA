@@ -25,7 +25,3 @@ sudo curl -L "https://github.com/docker/compose/releases/download/1.24.0/docker-
 sudo chmod +x /usr/local/bin/docker-compose
 sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
 docker-compose --version
-
-mkdir -p certs
-mkdir -p scale/data
-mkdir -p scale/certs
