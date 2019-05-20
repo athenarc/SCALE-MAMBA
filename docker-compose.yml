@@ -1,0 +1,13 @@
+version: '3.7'
+services:
+  SCALE:
+    container_name: SCALE
+    image: SCALE:latest
+    build:
+      context: ./
+    networks:
+      - SCALE
+
+networks:
+  SCALE:
+    name: SCALE
