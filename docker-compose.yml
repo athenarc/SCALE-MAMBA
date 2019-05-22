@@ -5,6 +5,8 @@ services:
     image: SCALE:latest
     build:
       context: ./
+    ports:
+      - ${PORT}:${PORT}
     networks:
       - SCALE
 
