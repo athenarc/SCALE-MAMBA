@@ -58,4 +58,4 @@ open_channel(500)
 def range_body(i):
   regint.public_output(i)
   cint.public_output(histogram[i].reveal())
-open_channel(501)
+close_channel(500)
