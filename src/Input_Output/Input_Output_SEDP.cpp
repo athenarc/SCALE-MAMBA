@@ -15,8 +15,6 @@ void Input_Output_SEDP::set_file_names(string a, string b) {
 
 long Input_Output_SEDP::open_channel(unsigned int channel)
 {
-  cout << "Opening channel " << channel << endl;
-
   if (channel == 0) {
     cout << "Init server!" << endl;
     s.init();
@@ -34,14 +32,15 @@ long Input_Output_SEDP::open_channel(unsigned int channel)
 
   if (channel == 4) {
     cout << "Getting data!" << endl;
-    // s.construct_random_triples();
     data = s.get_data();
-
-    // for (auto &d : data) {
-    //   cout << d << endl;
-    // }
   }
 
+  if (channel == 500){
+    cout << "OUTPUT START:" << endl;
+  }
+  if (channel == 501){
+    cout << "OUTPUT END" << endl;
+  }
   return 0;
 }
 
@@ -87,7 +86,6 @@ gfp Input_Output_SEDP::public_input_gfp(unsigned int channel)
 void Input_Output_SEDP::public_output_gfp(const gfp &output, unsigned int channel)
 {
   if (channel == 0){
-    cout << "Output channel " << channel << " : ";
     output.output(cout, true);
     cout << endl;
   }
@@ -111,7 +109,7 @@ long Input_Output_SEDP::public_input_int(unsigned int channel)
 void Input_Output_SEDP::public_output_int(const long output, unsigned int channel)
 {
   if (channel == 0){
-    cout << "Output channel " << channel << " : " << output << endl;
+    cout << output << " ";
   }
 }
 
