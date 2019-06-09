@@ -38,16 +38,14 @@ long Input_Output_SEDP::open_channel(unsigned int channel)
   if (channel == 500){
     cout << "OUTPUT START:" << endl;
   }
-  if (channel == 501){
-    cout << "OUTPUT END" << endl;
-  }
   return 0;
 }
 
 void Input_Output_SEDP::close_channel(unsigned int channel)
 {
-  cout << "Closing channel " << channel << endl;
-}
+  if (channel == 500){
+      cout << "OUTPUT END" << endl;
+    }
 
 gfp Input_Output_SEDP::private_input_gfp(unsigned int channel)
 {
