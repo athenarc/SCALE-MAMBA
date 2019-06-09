@@ -46,6 +46,7 @@ void Input_Output_SEDP::close_channel(unsigned int channel)
   if (channel == 500){
       cout << "OUTPUT END" << endl;
     }
+}
 
 gfp Input_Output_SEDP::private_input_gfp(unsigned int channel)
 {
