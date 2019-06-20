@@ -18,7 +18,7 @@ class IO_Factory
       ;
     }
     // Factory Method
-    static unique_ptr<IO_Stream> make_io(unsigned int choice, int player_id, int numclients);
+    static unique_ptr<IO_Stream> make_io(unsigned int choice, unsigned int player_id, int numclients);
 };
 
 #endif
