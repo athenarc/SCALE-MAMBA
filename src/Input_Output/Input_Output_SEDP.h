@@ -27,15 +27,15 @@ using namespace std;
 class Input_Output_SEDP : public IO_Stream
 {
 private:
-  int player_id;
+  int player_id, numclients;
   sedp::Server s;
   vector<gfp> data;
 public:
   string inf_name;
   string onf_name;
 
-  Input_Output_SEDP(int player_id)
-      : IO_Stream(), player_id{player_id}, s{player_id, (14000 + player_id), 3}
+  Input_Output_SEDP(int player_id, int numclients)
+      : IO_Stream(), player_id{player_id}, s{player_id, (14000 + player_id), numclients}
   {
     ;
   }

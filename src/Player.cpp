@@ -135,7 +135,7 @@ int main(int argc, const char *argv[])
 
   opt.parse(argc, argv);
 
-  unsigned int my_number;
+  unsigned int my_number, numclients;
   int verbose, fhefacts;
   string progname;
   string memtype;
@@ -147,7 +147,7 @@ int main(int argc, const char *argv[])
   vector<string> badOptions;
   unsigned int i;
 
-  if (allArgs.size() != 3)
+  if (allArgs.size() != 4)
     {
       cerr << "ERROR: incorrect number of arguments to Player.x\n";
       cerr << "Arguments given were:\n";
@@ -161,6 +161,7 @@ int main(int argc, const char *argv[])
     {
       my_number= (unsigned int) atoi(allArgs[1]->c_str());
       progname= *allArgs[2];
+      numclients = (unsigned int) atoi(allArgs[3]->c_str());
     }
 
   if (!opt.gotRequired(badOptions))
@@ -387,7 +388,7 @@ int main(int argc, const char *argv[])
   //  - This depends on what IO machinary you are using
   //  - Here we are just using the simple IO class
 
-  App app(my_number);
+  App app(my_number, numclients);
 
   machine.Setup_IO(std::move(app.make_IO()));
 
