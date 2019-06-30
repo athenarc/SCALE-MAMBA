@@ -11,11 +11,11 @@ using namespace std;
 class App {
 public:
   unsigned int playerID;
-  unsigned int numclients;
+  unsigned int number_of_clients;
   ifstream ifs;
   ofstream ofs;
 
-  App(unsigned int id, unsigned int nclients): playerID{id}, numclients{nclients} {}
+  App(unsigned int id, unsigned int nclients): playerID{id}, number_of_clients{nclients} {}
 
 
   unique_ptr<IO_Stream> make_IO();
