@@ -1,6 +1,6 @@
 #include "IO_Factory.h"
 
-unique_ptr<IO_Stream> IO_Factory::make_io(unsigned int choice, int player_id)
+unique_ptr<IO_Stream> IO_Factory::make_io(unsigned int choice, int player_id, int number_of_clients)
 {
 
   if (choice == IO_SIMPLE) {
@@ -10,7 +10,7 @@ unique_ptr<IO_Stream> IO_Factory::make_io(unsigned int choice, int player_id)
     return unique_ptr<IO_Stream>(new Input_Output_File);
   }
   else if (choice == IO_SEDP) {
-    return unique_ptr<IO_Stream>(new Input_Output_SEDP(player_id));
+    return unique_ptr<IO_Stream>(new Input_Output_SEDP(player_id, number_of_clients));
   }
 
   return unique_ptr<IO_Stream>(new Input_Output_Simple);

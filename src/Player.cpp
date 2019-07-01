@@ -132,6 +132,13 @@ int main(int argc, const char *argv[])
           "Fire up the experiment OT/GC system",
           "-OT" // Flag token.
   );
+  opt.add("3", // Default.
+        1,   // Required?
+        1,   // Number of args expected.
+        0,   // Delimiter if expecting multiple args.
+        "Number of clients that will share data",
+        "-clients" // Flag token.
+  );
 
   opt.parse(argc, argv);
 
@@ -161,6 +168,7 @@ int main(int argc, const char *argv[])
     {
       my_number= (unsigned int) atoi(allArgs[1]->c_str());
       progname= *allArgs[2];
+      // number_of_clients = (unsigned int) atoi(allArgs[3]->c_str());
     }
 
   if (!opt.gotRequired(badOptions))
@@ -183,7 +191,7 @@ int main(int argc, const char *argv[])
     }
 
   vector<int> pns, minimums, maximums;
-  int te;
+  int te, number_of_clients;
   opt.get("-portnumbase")->getInt(te);
   portnumbase= (unsigned int) te;
   opt.get("-memory")->getString(memtype);
@@ -192,6 +200,8 @@ int main(int argc, const char *argv[])
   opt.get("-pns")->getInts(pns);
   opt.get("-min")->getInts(minimums);
   opt.get("-max")->getInts(maximums);
+  opt.get("-clients")->getInt(number_of_clients);
+
 
   /*************************************
    *  Setup offline_control_data OCD   *
@@ -387,7 +397,7 @@ int main(int argc, const char *argv[])
   //  - This depends on what IO machinary you are using
   //  - Here we are just using the simple IO class
 
-  App app(my_number);
+  App app(my_number, number_of_clients);
 
   machine.Setup_IO(std::move(app.make_IO()));
 
