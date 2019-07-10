@@ -38,6 +38,7 @@ long Input_Output_SEDP::open_channel(unsigned int channel)
   if (channel == 500){
     cout << "# OUTPUT START:" << endl;
   }
+
   return 0;
 }
 
@@ -48,8 +49,8 @@ void Input_Output_SEDP::close_channel(unsigned int channel)
   }
 
   if (channel == 500){
-      cout << "$ OUTPUT END" << endl;
-    }
+    cout << "$ OUTPUT END" << endl;
+  }
 }
 
 gfp Input_Output_SEDP::private_input_gfp(unsigned int channel)
@@ -70,25 +71,24 @@ void Input_Output_SEDP::private_output_gfp(const gfp &output, unsigned int chann
 gfp Input_Output_SEDP::public_input_gfp(unsigned int channel)
 {
   gfp y;
+
   if (channel >= 1000){
     y = data.at(0);
     data.erase(data.begin());
     Update_Checker(y, channel);
-    }
-
-  else {
+  } else {
     cout << "Enter value on channel " << channel << " : ";
     y.assign(0);
     // Important to have this call in each version of public_input_gfp
     Update_Checker(y, channel);
   }
-  return y;
 
+  return y;
 }
 
 void Input_Output_SEDP::public_output_gfp(const gfp &output, unsigned int channel)
 {
-  if (channel == 0){
+  if (channel == 0) {
     output.output(cout, true);
     cout << endl;
   }
