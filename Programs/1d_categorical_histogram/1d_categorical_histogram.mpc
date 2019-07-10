@@ -1,0 +1,66 @@
+size_alloc = 54 # <% sizeAllocation %>
+bins = 18  # <% cellsX %>
+no_clients = 3 # <% clients %>
+
+data = sint.Matrix(bins,no_clients)
+
+def output_random_triples(cond):
+  @for_range(bins)
+  def range_body(i):
+    # naming as in Damgard et al
+    y, r, w = sint.get_random_triple()
+    v, un1, un2 = sint.get_random_triple()
+    u = v * r
+    outp = [y, r, w, v, u]
+    output_shares(2,*outp)
+    data[i][cond] = y
+  return cond + 1
+
+open_channel(0)
+open_channel(1)
+
+n = regint.public_input(1)
+print_ln("Dataset size %s", n)
+
+open_channel(2)
+
+while_loop(output_random_triples, lambda x: x < no_clients, 0)
+
+open_channel(3) # construct triples
+open_channel(4) # get data
+
+def import_data(cond):
+  @for_range(bins)
+  def range_body(i):
+    # naming as in Damgard et al
+    y = cint.public_input(1000)
+    data[i][cond] = y + data[i][cond]
+  return cond + 1
+
+while_loop(import_data, lambda x: x < no_clients, 0)
+
+close_channel(4)
+close_channel(3)
+close_channel(2)
+close_channel(1)
+close_channel(0)
+
+# --------------------------------------------------------------------------------------
+# ======================================================================================
+# --------------------------------------------------------------------------------------
+
+
+histogram = sint.Array(bins)
+
+@for_range(bins)
+def range_body(i):
+  @for_range(no_clients)
+  def range_body2(j):
+    histogram[i] = histogram[i] + data[i][j]
+
+open_channel(500)
+@for_range(len(histogram))
+def range_body(i):
+  regint.public_output(i)
+  cint.public_output(histogram[i].reveal())
+close_channel(500)
