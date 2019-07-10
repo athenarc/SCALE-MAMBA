@@ -107,8 +107,8 @@ long Input_Output_SEDP::public_input_int(unsigned int channel)
 
 void Input_Output_SEDP::public_output_int(const long output, unsigned int channel)
 {
-  if (channel == 0){
-    cout << output << " ";
+  if (channel == 0) {
+    cout << output << ",";
   }
 }
 
