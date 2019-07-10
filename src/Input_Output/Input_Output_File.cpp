@@ -102,6 +102,7 @@ void Input_Output_File::public_output_int(const long output, unsigned int channe
 
 void Input_Output_File::output_share(const Share &S, unsigned int channel)
 {
+  (*outf) << "Output channel " << channel << " : ";
   S.output(*outf, human);
 }
 
