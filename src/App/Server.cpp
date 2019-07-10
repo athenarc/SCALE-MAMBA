@@ -1,6 +1,6 @@
 #include "Server.h"
 
-sedp::Server::Server(unsigned int id, unsigned int port, unsigned int expected_clients){
+sedp::Server::Server(unsigned int id, unsigned int port, unsigned int expected_clients) {
   ProtocolEntity();
   player_id = id;
   port_number = port;
@@ -8,7 +8,7 @@ sedp::Server::Server(unsigned int id, unsigned int port, unsigned int expected_c
   accepted_clients = 0;
   handled_clients = 0;
   total_data = 0;
-};
+}
 
 sedp::Server::~Server() {
 
