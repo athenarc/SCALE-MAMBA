@@ -1,7 +1,7 @@
 #include "Client.h"
 
 sedp::Client::Client(unsigned int id, unsigned int max_players, string dataset):
-  client_id{id}, max_players{max_players}, dataset_size{0}, dataset_file_path{dataset}
+  client_id{id}, max_players{max_players}, dataset_file_path{dataset}, dataset_size{0}
 {
   ssl.resize(max_players);
 }
