@@ -31,7 +31,6 @@ void sedp::Server::init() {
   socket_id = OpenListener(port_number, max_clients);
   struct sockaddr_in addr;
   memset(&addr, 0, sizeof(addr));
-  socklen_t len = sizeof(addr);
 
   cout << "Server (Player) " << player_id << ": Start listening at port " << port_number << endl;
   protocol_state = State::HANDSHAKE;
@@ -209,7 +208,7 @@ void sedp::Server::handle_clients() {
   int end = 0;
 
   for (itr = clients.begin(); itr != clients.end(); ++itr) {
-    int client_id = itr->first[0];
+    // int client_id = itr->first[0];
     int dataset_size = itr -> first[1];
     SSL* ssl = itr->second;
 
