@@ -15,8 +15,6 @@ void Input_Output_SEDP::set_file_names(string a, string b) {
 
 long Input_Output_SEDP::open_channel(unsigned int channel)
 {
-  cout << "Opening channel " << channel << endl;
-
   if (channel == 0) {
     cout << "Init server!" << endl;
     s.init();
@@ -34,12 +32,11 @@ long Input_Output_SEDP::open_channel(unsigned int channel)
 
   if (channel == 4) {
     cout << "Getting data!" << endl;
-    // s.construct_random_triples();
     data = s.get_data();
+  }
 
-    // for (auto &d : data) {
-    //   cout << d << endl;
-    // }
+  if (channel == 500){
+    cout << "# OUTPUT START:" << endl;
   }
 
   return 0;
@@ -47,7 +44,13 @@ long Input_Output_SEDP::open_channel(unsigned int channel)
 
 void Input_Output_SEDP::close_channel(unsigned int channel)
 {
-  cout << "Closing channel " << channel << endl;
+  if (channel == 0){
+    cout << "Importation finished. Starting SMPC computation..." << endl;
+  }
+
+  if (channel == 500){
+    cout << "$ OUTPUT END" << endl;
+  }
 }
 
 gfp Input_Output_SEDP::private_input_gfp(unsigned int channel)
@@ -68,26 +71,24 @@ void Input_Output_SEDP::private_output_gfp(const gfp &output, unsigned int chann
 gfp Input_Output_SEDP::public_input_gfp(unsigned int channel)
 {
   gfp y;
+
   if (channel >= 1000){
     y = data.at(0);
     data.erase(data.begin());
     Update_Checker(y, channel);
-    }
-
-  else {
+  } else {
     cout << "Enter value on channel " << channel << " : ";
     y.assign(0);
     // Important to have this call in each version of public_input_gfp
     Update_Checker(y, channel);
   }
-  return y;
 
+  return y;
 }
 
 void Input_Output_SEDP::public_output_gfp(const gfp &output, unsigned int channel)
 {
-  if (channel == 0){
-    cout << "Output channel " << channel << " : ";
+  if (channel == 0) {
     output.output(cout, true);
     cout << endl;
   }
@@ -110,8 +111,8 @@ long Input_Output_SEDP::public_input_int(unsigned int channel)
 
 void Input_Output_SEDP::public_output_int(const long output, unsigned int channel)
 {
-  if (channel == 0){
-    cout << "Output channel " << channel << " : " << output << endl;
+  if (channel == 0) {
+    cout << output << ",";
   }
 }
 
