@@ -43,6 +43,10 @@ long Input_Output_SEDP::open_channel(unsigned int channel)
 
 void Input_Output_SEDP::close_channel(unsigned int channel)
 {
+  if (channel == 0){
+    cout << "Importation finished. Starting SMPC computation..." << endl;
+  }
+
   if (channel == 500){
       cout << "$ OUTPUT END" << endl;
     }
