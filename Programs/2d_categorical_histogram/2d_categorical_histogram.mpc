@@ -1,6 +1,6 @@
-sizeAllocation = 54# {{sizeAllocation}}
-bins = 18  # {{bins}}
-no_clients = 3 # {{clients}}
+size_alloc = 54 # <% sizeAlloc %>
+bins = 18  # <% cellsY %>
+no_clients = 3 # <% clients %>
 
 data = sint.Matrix(bins,no_clients)
 
@@ -59,8 +59,10 @@ def range_body(i):
     histogram[i] = histogram[i] + data[i][j]
 
 open_channel(500)
+
 @for_range(len(histogram))
 def range_body(i):
   regint.public_output(i)
   cint.public_output(histogram[i].reveal())
+
 close_channel(500)

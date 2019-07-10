@@ -1,6 +1,6 @@
-sizeAllocation = 54# {{sizeAllocation}}
-bins = 18  # {{bins}}
-no_clients = 3 # {{clients}}
+size_alloc = 54 # <% sizeAllocation %>
+bins = 18  # <% cellsX %>
+no_clients = 3 # <% clients %>
 
 data = sint.Matrix(bins,no_clients)
 
